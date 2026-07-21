@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   View,
   Text,
+  Image,
   ScrollView,
   TouchableOpacity,
   StyleSheet,
@@ -18,6 +19,16 @@ import { AvatarIcon, loadProfile, UserProfile } from '../components/ProfileModal
 
 interface HomeScreenProps {
   navigation: any;
+}
+
+function isValidUrl(uri: string): boolean {
+  if (!uri || uri.trim() === '') return false;
+  if (uri.includes('placeholder.com')) return false;
+  return uri.startsWith('http://') || uri.startsWith('https://');
+}
+
+function getInitial(name: string): string {
+  return (name || '?').charAt(0).toUpperCase();
 }
 
 export function HomeScreen({ navigation }: HomeScreenProps) {
@@ -84,6 +95,17 @@ export function HomeScreen({ navigation }: HomeScreenProps) {
     : apps;
 
   const featuredApps = api.getFeaturedApps(apps, 5);
+
+  // Get similar apps for search results
+  const getSimilarApps = (targetApp: AppData): AppData[] => {
+    return apps.filter(
+      (a) =>
+        a.ID !== targetApp.ID &&
+        (a.categoria === targetApp.categoria ||
+          a.CategoriaSlug === targetApp.CategoriaSlug ||
+          a.SubcategoriaSlug === targetApp.SubcategoriaSlug)
+    ).slice(0, 8);
+  };
 
   if (loading) {
     return (
@@ -165,13 +187,99 @@ export function HomeScreen({ navigation }: HomeScreenProps) {
         {/* Search Results */}
         {searchResults !== null ? (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>
-              {searchResults.length} resultado(s) encontrado(s)
-            </Text>
             {searchResults.length > 0 ? (
-              searchResults.map((app) => (
-                <AppListItem key={app.ID} app={app} onPress={() => navigateToApp(app)} />
-              ))
+              <>
+                {/* Featured Search Result */}
+                {searchResults.length > 0 && (
+                  <View style={styles.searchFeatured}>
+                    <TouchableOpacity
+                      style={styles.searchFeaturedCard}
+                      onPress={() => navigateToApp(searchResults[0])}
+                      activeOpacity={0.7}
+                    >
+                      <View style={styles.searchFeaturedTop}>
+                        {isValidUrl(searchResults[0].logo) ? (
+                          <Image
+                            source={{ uri: searchResults[0].logo }}
+                            style={styles.searchFeaturedLogo}
+                            resizeMode="cover"
+                          />
+                        ) : (
+                          <View style={styles.searchFeaturedFallback}>
+                            <Text style={styles.searchFeaturedFallbackText}>
+                              {getInitial(searchResults[0].NomeAPP)}
+                            </Text>
+                          </View>
+                        )}
+                        <View style={styles.searchFeaturedInfo}>
+                          <Text style={styles.searchFeaturedName}>{searchResults[0].NomeAPP}</Text>
+                          <Text style={styles.searchFeaturedDesc} numberOfLines={2}>
+                            {searchResults[0].Descricao || searchResults[0].descricao || ''}
+                          </Text>
+                          <View style={styles.searchFeaturedMeta}>
+                            <Text style={styles.searchFeaturedVersion}>v{searchResults[0].Versao}</Text>
+                            <View style={styles.searchFeaturedBadge}>
+                              <Text style={styles.searchFeaturedBadgeText}>{searchResults[0].categoria}</Text>
+                            </View>
+                          </View>
+                        </View>
+                      </View>
+                      <TouchableOpacity
+                        style={styles.searchInstallBtn}
+                        onPress={() => navigateToApp(searchResults[0])}
+                      >
+                        <Ionicons name="download-outline" size={18} color={Colors.text} />
+                        <Text style={styles.searchInstallText}>Instalar</Text>
+                      </TouchableOpacity>
+                    </TouchableOpacity>
+                  </View>
+                )}
+
+                {/* Similar Apps */}
+                {(() => {
+                  const similar = getSimilarApps(searchResults[0]);
+                  if (similar.length === 0) return null;
+                  return (
+                    <View style={styles.similarSection}>
+                      <Text style={styles.sectionTitle}>Semelhantes nesta categoria</Text>
+                      <FlatList
+                        data={similar}
+                        keyExtractor={(item) => item.ID}
+                        horizontal
+                        showsHorizontalScrollIndicator={false}
+                        contentContainerStyle={styles.similarList}
+                        renderItem={({ item }) => (
+                          <TouchableOpacity
+                            style={styles.similarCard}
+                            onPress={() => navigateToApp(item)}
+                            activeOpacity={0.7}
+                          >
+                            {isValidUrl(item.logo) ? (
+                              <Image source={{ uri: item.logo }} style={styles.similarLogo} resizeMode="cover" />
+                            ) : (
+                              <View style={styles.similarFallback}>
+                                <Text style={styles.similarFallbackText}>{getInitial(item.NomeAPP)}</Text>
+                              </View>
+                            )}
+                            <Text style={styles.similarName} numberOfLines={1}>{item.NomeAPP}</Text>
+                            <Text style={styles.similarVersion}>v{item.Versao}</Text>
+                          </TouchableOpacity>
+                        )}
+                      />
+                    </View>
+                  );
+                })()}
+
+                {/* Other results */}
+                {searchResults.length > 1 && (
+                  <View style={styles.otherResults}>
+                    <Text style={styles.sectionTitle}>Outros resultados</Text>
+                    {searchResults.slice(1).map((app) => (
+                      <AppListItem key={app.ID} app={app} onPress={() => navigateToApp(app)} />
+                    ))}
+                  </View>
+                )}
+              </>
             ) : (
               <View style={styles.emptyState}>
                 <Ionicons name="search-outline" size={48} color={Colors.textMuted} />
@@ -181,7 +289,7 @@ export function HomeScreen({ navigation }: HomeScreenProps) {
           </View>
         ) : (
           <>
-            {/* Featured Section - Snap Scroll Carousel */}
+            {/* Featured Section */}
             {!selectedCategory && featuredApps.length > 0 && (
               <View style={styles.section}>
                 <View style={styles.sectionHeader}>
@@ -208,7 +316,6 @@ export function HomeScreen({ navigation }: HomeScreenProps) {
                     <FeaturedCard app={item} onPress={() => navigateToApp(item)} />
                   )}
                 />
-                {/* Dots indicator */}
                 {featuredApps.length > 1 && (
                   <View style={styles.dotsContainer}>
                     {featuredApps.map((_, i) => (
@@ -245,149 +352,85 @@ export function HomeScreen({ navigation }: HomeScreenProps) {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.background,
-  },
-  loadingContainer: {
-    flex: 1,
-    backgroundColor: Colors.background,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  loadingText: {
-    color: Colors.textSecondary,
-    marginTop: Spacing.md,
-    fontSize: 16,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingBottom: 120,
-  },
-  header: {
-    paddingHorizontal: Spacing.md,
-    paddingTop: Spacing.xl,
-    paddingBottom: Spacing.sm,
-  },
-  headerTop: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: Spacing.md,
-  },
-  greeting: {
-    color: Colors.textSecondary,
-    fontSize: 13,
-  },
-  title: {
-    color: Colors.text,
-    fontSize: 26,
-    fontWeight: 'bold',
-  },
-  avatarButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    overflow: 'hidden',
-  },
+  container: { flex: 1, backgroundColor: Colors.background },
+  loadingContainer: { flex: 1, backgroundColor: Colors.background, justifyContent: 'center', alignItems: 'center' },
+  loadingText: { color: Colors.textSecondary, marginTop: Spacing.md, fontSize: 16 },
+  scrollView: { flex: 1 },
+  scrollContent: { paddingBottom: 120 },
+  header: { paddingHorizontal: Spacing.md, paddingTop: Spacing.xl, paddingBottom: Spacing.sm },
+  headerTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: Spacing.md },
+  greeting: { color: Colors.textSecondary, fontSize: 13 },
+  title: { color: Colors.text, fontSize: 26, fontWeight: 'bold' },
+  avatarButton: { width: 40, height: 40, borderRadius: 20, overflow: 'hidden' },
   searchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: Colors.backgroundCard,
-    borderRadius: BorderRadius.md,
-    paddingHorizontal: Spacing.md,
-    height: 44,
-    borderWidth: 1,
-    borderColor: Colors.border,
+    flexDirection: 'row', alignItems: 'center', backgroundColor: Colors.backgroundCard,
+    borderRadius: BorderRadius.md, paddingHorizontal: Spacing.md, height: 44,
+    borderWidth: 1, borderColor: Colors.border,
   },
-  searchInput: {
-    flex: 1,
-    height: 44,
-    color: Colors.text,
-    fontSize: 15,
-    marginLeft: Spacing.sm,
-  },
-  chipsSection: {
-    paddingVertical: Spacing.sm,
-  },
-  chipsList: {
-    paddingHorizontal: Spacing.md,
-    gap: Spacing.sm,
-  },
+  searchInput: { flex: 1, height: 44, color: Colors.text, fontSize: 15, marginLeft: Spacing.sm },
+  chipsSection: { paddingVertical: Spacing.sm },
+  chipsList: { paddingHorizontal: Spacing.md, gap: Spacing.sm },
   chip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: Colors.chipInactive,
-    borderRadius: BorderRadius.xl,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.sm,
-    borderWidth: 1,
-    borderColor: Colors.chipBorder,
-    gap: Spacing.xs,
+    flexDirection: 'row', alignItems: 'center', backgroundColor: Colors.chipInactive,
+    borderRadius: BorderRadius.xl, paddingHorizontal: Spacing.md, paddingVertical: Spacing.sm,
+    borderWidth: 1, borderColor: Colors.chipBorder, gap: Spacing.xs,
   },
-  chipActive: {
-    backgroundColor: Colors.chipActive,
-    borderColor: Colors.chipActive,
+  chipActive: { backgroundColor: Colors.chipActive, borderColor: Colors.chipActive },
+  chipIcon: { fontSize: 14 },
+  chipText: { color: Colors.textSecondary, fontSize: 13, fontWeight: '500' },
+  chipTextActive: { color: Colors.text, fontWeight: '600' },
+  section: { marginTop: Spacing.sm, paddingHorizontal: Spacing.md },
+  sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: Spacing.sm },
+  sectionTitle: { color: Colors.text, fontSize: 18, fontWeight: 'bold' },
+  sectionCount: { color: Colors.textMuted, fontSize: 12 },
+  featuredList: { paddingBottom: Spacing.sm },
+  dotsContainer: { flexDirection: 'row', justifyContent: 'center', marginTop: Spacing.sm, gap: 6 },
+  dot: { width: 6, height: 6, borderRadius: 3, backgroundColor: Colors.textMuted },
+  dotActive: { backgroundColor: Colors.primary, width: 16 },
+  emptyState: { alignItems: 'center', paddingVertical: Spacing.xxl },
+  emptyText: { color: Colors.textMuted, fontSize: 15, marginTop: Spacing.md },
+
+  // Search Featured
+  searchFeatured: { marginBottom: Spacing.lg },
+  searchFeaturedCard: {
+    backgroundColor: Colors.backgroundCard, borderRadius: BorderRadius.lg,
+    padding: Spacing.md, borderWidth: 1, borderColor: Colors.primary + '40',
   },
-  chipIcon: {
-    fontSize: 14,
+  searchFeaturedTop: { flexDirection: 'row', marginBottom: Spacing.md },
+  searchFeaturedLogo: { width: 72, height: 72, borderRadius: BorderRadius.md, backgroundColor: Colors.surface },
+  searchFeaturedFallback: {
+    width: 72, height: 72, borderRadius: BorderRadius.md, backgroundColor: Colors.primary,
+    justifyContent: 'center', alignItems: 'center',
   },
-  chipText: {
-    color: Colors.textSecondary,
-    fontSize: 13,
-    fontWeight: '500',
+  searchFeaturedFallbackText: { color: Colors.text, fontSize: 28, fontWeight: 'bold' },
+  searchFeaturedInfo: { flex: 1, marginLeft: Spacing.md },
+  searchFeaturedName: { color: Colors.text, fontSize: 18, fontWeight: 'bold', marginBottom: 2 },
+  searchFeaturedDesc: { color: Colors.textSecondary, fontSize: 13, marginBottom: 6 },
+  searchFeaturedMeta: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm },
+  searchFeaturedVersion: { color: Colors.textMuted, fontSize: 12 },
+  searchFeaturedBadge: { backgroundColor: Colors.primary + '25', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 4 },
+  searchFeaturedBadgeText: { color: Colors.primaryLight, fontSize: 11, fontWeight: '500' },
+  searchInstallBtn: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+    backgroundColor: Colors.primary, paddingVertical: Spacing.md, borderRadius: BorderRadius.md, gap: Spacing.sm,
   },
-  chipTextActive: {
-    color: Colors.text,
-    fontWeight: '600',
+  searchInstallText: { color: Colors.text, fontSize: 15, fontWeight: '700' },
+
+  // Similar Apps
+  similarSection: { marginBottom: Spacing.lg },
+  similarList: { paddingBottom: Spacing.sm, gap: Spacing.sm },
+  similarCard: {
+    width: 100, alignItems: 'center', backgroundColor: Colors.backgroundCard,
+    borderRadius: BorderRadius.md, padding: Spacing.sm, borderWidth: 1, borderColor: Colors.border,
   },
-  section: {
-    marginTop: Spacing.sm,
-    paddingHorizontal: Spacing.md,
+  similarLogo: { width: 56, height: 56, borderRadius: BorderRadius.md, backgroundColor: Colors.surface, marginBottom: Spacing.xs },
+  similarFallback: {
+    width: 56, height: 56, borderRadius: BorderRadius.md, backgroundColor: Colors.primary + '30',
+    justifyContent: 'center', alignItems: 'center', marginBottom: Spacing.xs,
   },
-  sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: Spacing.sm,
-  },
-  sectionTitle: {
-    color: Colors.text,
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  sectionCount: {
-    color: Colors.textMuted,
-    fontSize: 12,
-  },
-  featuredList: {
-    paddingBottom: Spacing.sm,
-  },
-  dotsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginTop: Spacing.sm,
-    gap: 6,
-  },
-  dot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: Colors.textMuted,
-  },
-  dotActive: {
-    backgroundColor: Colors.primary,
-    width: 16,
-  },
-  emptyState: {
-    alignItems: 'center',
-    paddingVertical: Spacing.xxl,
-  },
-  emptyText: {
-    color: Colors.textMuted,
-    fontSize: 15,
-    marginTop: Spacing.md,
-  },
+  similarFallbackText: { color: Colors.primaryLight, fontSize: 20, fontWeight: 'bold' },
+  similarName: { color: Colors.text, fontSize: 12, fontWeight: '600', textAlign: 'center' },
+  similarVersion: { color: Colors.textMuted, fontSize: 10, marginTop: 2 },
+
+  otherResults: { marginTop: Spacing.sm },
 });

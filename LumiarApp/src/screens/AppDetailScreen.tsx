@@ -15,7 +15,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Spacing, BorderRadius } from '../constants/theme';
 import { api, AppData } from '../services/api';
-import { ScreenshotItem } from '../components/AppCard';
+import { Lightbox } from '../components/Lightbox';
 
 const { width } = Dimensions.get('window');
 
@@ -57,6 +57,29 @@ function DetailBanner({ uri, name }: { uri: string; name: string }) {
   );
 }
 
+function ScreenshotTouchable({ uri, name, onPress }: { uri: string; name: string; onPress: () => void }) {
+  const [hasError, setHasError] = React.useState(false);
+
+  if (hasError || !isValidUrl(uri)) {
+    return (
+      <View style={styles.screenshotFallback}>
+        <Text style={styles.screenshotFallbackText}>{getInitial(name)}</Text>
+      </View>
+    );
+  }
+
+  return (
+    <TouchableOpacity onPress={onPress} activeOpacity={0.8}>
+      <Image
+        source={{ uri }}
+        style={styles.screenshot}
+        resizeMode="cover"
+        onError={() => setHasError(true)}
+      />
+    </TouchableOpacity>
+  );
+}
+
 interface AppDetailScreenProps {
   route: { params: { appId: string } };
   navigation: any;
@@ -68,6 +91,7 @@ export function AppDetailScreen({ route, navigation }: AppDetailScreenProps) {
   const [loading, setLoading] = useState(true);
   const [downloading, setDownloading] = useState(false);
   const [showWarning, setShowWarning] = useState(false);
+  const [lightboxUri, setLightboxUri] = useState<string | null>(null);
 
   useEffect(() => {
     loadApp();
@@ -174,13 +198,25 @@ export function AppDetailScreen({ route, navigation }: AppDetailScreenProps) {
             </Text>
           </View>
 
-          {/* Screenshots */}
+          {/* Screenshots with Lightbox */}
           {(isValidUrl(app.img1) || isValidUrl(app.img2)) && (
             <View style={styles.screenshotsSection}>
               <Text style={styles.descTitle}>Screenshots</Text>
               <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.screenshotsList}>
-                {isValidUrl(app.img1) && <ScreenshotItem uri={app.img1} name={app.NomeAPP} />}
-                {isValidUrl(app.img2) && <ScreenshotItem uri={app.img2} name={app.NomeAPP} />}
+                {isValidUrl(app.img1) && (
+                  <ScreenshotTouchable
+                    uri={app.img1}
+                    name={app.NomeAPP}
+                    onPress={() => setLightboxUri(app.img1)}
+                  />
+                )}
+                {isValidUrl(app.img2) && (
+                  <ScreenshotTouchable
+                    uri={app.img2}
+                    name={app.NomeAPP}
+                    onPress={() => setLightboxUri(app.img2)}
+                  />
+                )}
               </ScrollView>
             </View>
           )}
@@ -235,9 +271,18 @@ export function AppDetailScreen({ route, navigation }: AppDetailScreenProps) {
           </View>
         </View>
       </Modal>
+
+      {/* Lightbox for Screenshots */}
+      <Lightbox
+        visible={lightboxUri !== null}
+        uri={lightboxUri || ''}
+        onClose={() => setLightboxUri(null)}
+      />
     </View>
   );
 }
+
+const SCREENSHOT_WIDTH = width * 0.65;
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.background },
@@ -270,6 +315,9 @@ const styles = StyleSheet.create({
   descText: { color: Colors.textSecondary, fontSize: 14, lineHeight: 22 },
   screenshotsSection: { marginBottom: Spacing.lg },
   screenshotsList: { paddingBottom: Spacing.xs },
+  screenshot: { width: SCREENSHOT_WIDTH, height: 200, borderRadius: BorderRadius.md, backgroundColor: Colors.surface, marginRight: Spacing.sm },
+  screenshotFallback: { width: SCREENSHOT_WIDTH, height: 200, borderRadius: BorderRadius.md, backgroundColor: Colors.primary + '30', justifyContent: 'center', alignItems: 'center', marginRight: Spacing.sm },
+  screenshotFallbackText: { color: Colors.primaryLight, fontSize: 40, fontWeight: 'bold', opacity: 0.4 },
   infoCards: { flexDirection: 'row', gap: Spacing.sm },
   infoCard: { flex: 1, backgroundColor: Colors.backgroundCard, borderRadius: BorderRadius.md, padding: Spacing.md, alignItems: 'center', borderWidth: 1, borderColor: Colors.border },
   infoLabel: { color: Colors.textMuted, fontSize: 11, marginTop: Spacing.xs },
@@ -279,8 +327,6 @@ const styles = StyleSheet.create({
   bottomBar: { position: 'absolute', bottom: 0, left: 0, right: 0, padding: Spacing.md, paddingBottom: Spacing.xl, backgroundColor: Colors.backgroundLight, borderTopWidth: 1, borderTopColor: Colors.border },
   downloadBarBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: Colors.primary, paddingVertical: Spacing.md, borderRadius: BorderRadius.md, gap: Spacing.sm },
   downloadBarText: { color: Colors.text, fontSize: 16, fontWeight: '700' },
-
-  // Warning Modal
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'center', alignItems: 'center', padding: Spacing.xl },
   modalCard: { backgroundColor: Colors.backgroundLight, borderRadius: BorderRadius.xl, padding: Spacing.lg, width: '100%', maxWidth: 360, alignItems: 'center', borderWidth: 1, borderColor: Colors.border },
   modalIcon: { marginBottom: Spacing.md },
