@@ -1,5 +1,5 @@
 {
-  "Versao": "1.0.7",
-  "Download": "https://github.com/TGTiler/Lumiar/releases/download/APKS/Lumiar-v1.0.7.apk",
-  "Changelog": "In-App Update: verificacao automatica de versao, modal de atualizacao com changelog, download direto do APK"
+  "Versao": "1.0.8",
+  "Download": "https://github.com/TGTiler/Lumiar/releases/download/APKS/Lumiar-v1.0.8.apk",
+  "Changelog": "Correcao da busca: semelhantes filtrados por CategoriaSlug, todos os resultados exibidos corretamente"
 }

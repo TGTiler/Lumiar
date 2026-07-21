@@ -96,15 +96,16 @@ export function HomeScreen({ navigation }: HomeScreenProps) {
 
   const featuredApps = api.getFeaturedApps(apps, 5);
 
-  // Get similar apps for search results
+  // Get similar apps for search results - STRICT same category only
   const getSimilarApps = (targetApp: AppData): AppData[] => {
+    const targetSlug = targetApp.CategoriaSlug || '';
+    const targetSubSlug = targetApp.SubcategoriaSlug || '';
     return apps.filter(
       (a) =>
         a.ID !== targetApp.ID &&
-        (a.categoria === targetApp.categoria ||
-          a.CategoriaSlug === targetApp.CategoriaSlug ||
-          a.SubcategoriaSlug === targetApp.SubcategoriaSlug)
-    ).slice(0, 8);
+        ((targetSlug && a.CategoriaSlug === targetSlug) ||
+         (targetSubSlug && a.SubcategoriaSlug === targetSubSlug))
+    );
   };
 
   if (loading) {
@@ -270,15 +271,23 @@ export function HomeScreen({ navigation }: HomeScreenProps) {
                   );
                 })()}
 
-                {/* Other results */}
-                {searchResults.length > 1 && (
-                  <View style={styles.otherResults}>
-                    <Text style={styles.sectionTitle}>Outros resultados</Text>
-                    {searchResults.slice(1).map((app) => (
-                      <AppListItem key={app.ID} app={app} onPress={() => navigateToApp(app)} />
-                    ))}
-                  </View>
-                )}
+                {/* Other results - all remaining search results not in featured or similar */}
+                {(() => {
+                  const featuredApp = searchResults[0];
+                  const similarIds = getSimilarApps(featuredApp).map(s => s.ID);
+                  const outrosResultados = searchResults.filter(
+                    (app, idx) => idx > 0 && !similarIds.includes(app.ID)
+                  );
+                  if (outrosResultados.length === 0) return null;
+                  return (
+                    <View style={styles.otherResults}>
+                      <Text style={styles.sectionTitle}>Outros resultados</Text>
+                      {outrosResultados.map((app) => (
+                        <AppListItem key={app.ID} app={app} onPress={() => navigateToApp(app)} />
+                      ))}
+                    </View>
+                  );
+                })()}
               </>
             ) : (
               <View style={styles.emptyState}>
