@@ -1,0 +1,86 @@
+[
+  {
+    "ID": "aB3$kL9mN2xPq5Rt",
+    "NomeAPP": "Lumiar Store",
+    "Versao": "1.0.0",
+    "logo": "https://via.placeholder.com/120/9D4EDD/FFFFFF?text=L",
+    "img1": "https://via.placeholder.com/400x700/16161E/9D4EDD?text=Screenshot+1",
+    "img2": "https://via.placeholder.com/400x700/16161E/9D4EDD?text=Screenshot+2",
+    "url_apk": "https://github.com/PichauInfor/Lumiar/releases/latest/download/Lumiar.apk",
+    "descricao": "A loja oficial Lumiar para apps alternativos e ports da comunidade.",
+    "categoria": "Utilidades",
+    "subcategoria": ""
+  },
+  {
+    "ID": "xY7#wM4nK8jHf2Qd",
+    "NomeAPP": "ReVanced YouTube",
+    "Versao": "19.16.39",
+    "logo": "https://via.placeholder.com/120/FF0000/FFFFFF?text=YT",
+    "img1": "https://via.placeholder.com/400x700/16161E/FF0000?text=YouTube+1",
+    "img2": "https://via.placeholder.com/400x700/16161E/FF0000?text=YouTube+2",
+    "url_apk": "https://github.com/ReVanced/revanced/releases/latest/download/revanced-youtube.apk",
+    "descricao": "YouTube modificado com recursos premium desbloqueados e sem anúncios.",
+    "categoria": "Mídia",
+    "subcategoria": "Players"
+  },
+  {
+    "ID": "pL2@sT6rV9cBn4Xe",
+    "NomeAPP": "ReVanced Instagram",
+    "Versao": "301.0.0",
+    "logo": "https://via.placeholder.com/120/E1306C/FFFFFF?text=IG",
+    "img1": "https://via.placeholder.com/400x700/16161E/E1306C?text=Instagram+1",
+    "img2": "https://via.placeholder.com/400x700/16161E/E1306C?text=Instagram+2",
+    "url_apk": "https://github.com/ReVanced/revanced/releases/latest/download/revanced-instagram.apk",
+    "descricao": "Instagram com melhorias de privacidade e recursos extras.",
+    "categoria": "Social",
+    "subcategoria": "Redes Sociais"
+  },
+  {
+    "ID": "kM5#jN8hG3wYq1Zf",
+    "NomeAPP": "NewPipe",
+    "Versao": "0.26.1",
+    "logo": "https://via.placeholder.com/120/FF0000/FFFFFF?text=NP",
+    "img1": "https://via.placeholder.com/400x700/16161E/FF0000?text=NewPipe+1",
+    "img2": "https://via.placeholder.com/400x700/16161E/FF0000?text=NewPipe+2",
+    "url_apk": "https://github.com/TeamNewPipe/NewPipe/releases/latest/download/NewPipe.apk",
+    "descricao": "Cliente leve do YouTube sem Google Play Services, com download de vídeos.",
+    "categoria": "Mídia",
+    "subcategoria": "Players"
+  },
+  {
+    "ID": "rT9$uV2xW5yBn7Qm",
+    "NomeAPP": "Bromite",
+    "Versao": "120.0.6099.144",
+    "logo": "https://via.placeholder.com/120/4285F4/FFFFFF?text=BR",
+    "img1": "https://via.placeholder.com/400x700/16161E/4285F4?text=Bromite+1",
+    "img2": "https://via.placeholder.com/400x700/16161E/4285F4?text=Bromite+2",
+    "url_apk": "https://github.com/bromite/bromite/releases/latest/download/Bromite.apk",
+    "descricao": "Fork do Chromium com bloqueador de anúncios integrado e privacidade aprimorada.",
+    "categoria": "Utilidades",
+    "subcategoria": ""
+  },
+  {
+    "ID": "hJ4@kL7mN1xPq3Rs",
+    "NomeAPP": "Termux",
+    "Versao": "0.118.1",
+    "logo": "https://via.placeholder.com/120/3DDC84/FFFFFF?text=TX",
+    "img1": "https://via.placeholder.com/400x700/16161E/3DDC84?text=Termux+1",
+    "img2": "https://via.placeholder.com/400x700/16161E/3DDC84?text=Termux+2",
+    "url_apk": "https://github.com/termux/termux-app/releases/latest/download/termux.apk",
+    "descricao": "Emulador de terminal Linux para Android com pacotes extras.",
+    "categoria": "Utilidades",
+    "subcategoria": ""
+  },
+  {
+    "ID": "wE6$rT9uV2xYn5Qm",
+    "NomeAPP": "MIUI Camera Port",
+    "Versao": "5.1.001790.3",
+    "logo": "https://via.placeholder.com/120/FF9800/FFFFFF?text=MC",
+    "img1": "https://via.placeholder.com/400x700/16161E/FF9800?text=Camera+1",
+    "img2": "https://via.placeholder.com/400x700/16161E/FF9800?text=Camera+2",
+    "url_apk": "https://github.com/PichauInfor/Lumiar/releases/latest/download/MIUICamera.apk",
+    "descricao": "Port da câmera MIUI para outros dispositivos Xiaomi e compatíveis.",
+    "categoria": "Utilidades",
+    "subcategoria": ""
+  }
+]

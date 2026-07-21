@@ -1,0 +1,1327 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lumiar — Painel Administrativo</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0B0B0F;
+  --surface: #12121A;
+  --card: #16161E;
+  --card-hover: #1C1C28;
+  --border: rgba(255,255,255,0.06);
+  --border-active: rgba(157,78,221,0.35);
+  --accent: #9D4EDD;
+  --accent-dark: #7B2CBF;
+  --accent-glow: rgba(157,78,221,0.25);
+  --accent-soft: rgba(157,78,221,0.08);
+  --green: #22C55E;
+  --green-soft: rgba(34,197,94,0.12);
+  --red: #EF4444;
+  --red-soft: rgba(239,68,68,0.12);
+  --yellow: #EAB308;
+  --yellow-soft: rgba(234,179,8,0.12);
+  --blue: #3B82F6;
+  --blue-soft: rgba(59,130,246,0.12);
+  --text: #E8E8ED;
+  --text-secondary: #9CA3AF;
+  --text-muted: #6B7280;
+  --radius: 16px;
+  --radius-sm: 12px;
+  --radius-full: 9999px;
+  --font: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+html { font-family: var(--font); background: var(--bg); color: var(--text); }
+body { display: flex; min-height: 100vh; }
+
+/* ── Sidebar ── */
+.sidebar {
+  width: 260px; background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  position: fixed; top: 0; bottom: 0; left: 0; z-index: 100;
+}
+
+.sidebar-header {
+  padding: 24px 20px; border-bottom: 1px solid var(--border);
+}
+
+.sidebar-logo {
+  font-size: 22px; font-weight: 800;
+  background: linear-gradient(135deg, var(--accent), #C77DFF);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.sidebar-sub {
+  font-size: 12px; color: var(--text-muted); margin-top: 2px;
+}
+
+.sidebar-nav { flex: 1; padding: 12px 8px; overflow-y: auto; }
+
+.nav-section {
+  font-size: 11px; font-weight: 600; color: var(--text-muted);
+  text-transform: uppercase; letter-spacing: 0.8px;
+  padding: 16px 12px 8px;
+}
+
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px; border-radius: var(--radius-sm);
+  cursor: pointer; font-size: 14px; font-weight: 500;
+  color: var(--text-secondary); transition: all 0.15s;
+}
+.nav-item:hover { background: rgba(255,255,255,0.04); color: var(--text); }
+.nav-item.active { background: var(--accent-soft); color: var(--accent); }
+
+.nav-item svg { width: 18px; height: 18px; flex-shrink: 0; }
+
+.nav-badge {
+  margin-left: auto; background: var(--accent);
+  color: #fff; font-size: 11px; font-weight: 600;
+  padding: 2px 8px; border-radius: var(--radius-full);
+}
+
+.sidebar-footer {
+  padding: 16px 20px; border-top: 1px solid var(--border);
+  font-size: 12px; color: var(--text-muted);
+}
+
+/* ── Main Content ── */
+.main { margin-left: 260px; flex: 1; min-height: 100vh; }
+
+.topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 20px 32px; border-bottom: 1px solid var(--border);
+  background: var(--surface); position: sticky; top: 0; z-index: 50;
+}
+
+.topbar-title { font-size: 20px; font-weight: 700; }
+
+.topbar-actions { display: flex; gap: 12px; }
+
+.content { padding: 32px; }
+
+/* ── Page Sections ── */
+.page { display: none; }
+.page.active { display: block; }
+
+/* ── Cards ── */
+.stats-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px; margin-bottom: 32px;
+}
+
+.stat-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 20px;
+}
+
+.stat-label {
+  font-size: 12px; font-weight: 500; color: var(--text-muted);
+  text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;
+}
+
+.stat-value { font-size: 28px; font-weight: 800; }
+.stat-value.accent { color: var(--accent); }
+.stat-value.green { color: var(--green); }
+
+/* ── Table ── */
+.table-wrap {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--radius); overflow: hidden;
+}
+
+.table-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 20px; border-bottom: 1px solid var(--border);
+}
+
+.table-title { font-size: 16px; font-weight: 600; }
+
+.table-search {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-full); padding: 8px 16px;
+}
+
+.table-search input {
+  background: none; border: none; outline: none;
+  color: var(--text); font-family: var(--font); font-size: 13px;
+  width: 200px;
+}
+.table-search input::placeholder { color: var(--text-muted); }
+
+table {
+  width: 100%; border-collapse: collapse;
+}
+
+th {
+  text-align: left; padding: 12px 20px;
+  font-size: 11px; font-weight: 600; color: var(--text-muted);
+  text-transform: uppercase; letter-spacing: 0.5px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(255,255,255,0.02);
+}
+
+td {
+  padding: 14px 20px; font-size: 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: rgba(255,255,255,0.02); }
+
+.table-logo {
+  width: 36px; height: 36px; border-radius: 10px;
+  object-fit: cover; border: 1px solid var(--border);
+}
+
+.table-name { font-weight: 600; }
+.table-id { font-size: 12px; color: var(--text-muted); }
+.table-version {
+  font-family: 'SF Mono', Consolas, monospace; font-size: 13px;
+}
+
+.badge {
+  display: inline-block; padding: 4px 10px;
+  border-radius: var(--radius-full);
+  font-size: 11px; font-weight: 600;
+}
+.badge-purple { background: var(--accent-soft); color: var(--accent); }
+.badge-green { background: var(--green-soft); color: var(--green); }
+.badge-yellow { background: var(--yellow-soft); color: var(--yellow); }
+.badge-blue { background: var(--blue-soft); color: var(--blue); }
+.badge-red { background: var(--red-soft); color: var(--red); }
+
+.actions-cell { display: flex; gap: 6px; }
+
+.btn-icon {
+  width: 32px; height: 32px; border: none;
+  border-radius: var(--radius-sm); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.15s;
+}
+.btn-icon.edit { background: var(--blue-soft); color: var(--blue); }
+.btn-icon.edit:hover { background: rgba(59,130,246,0.2); }
+.btn-icon.delete { background: var(--red-soft); color: var(--red); }
+.btn-icon.delete:hover { background: rgba(239,68,68,0.2); }
+.btn-icon svg { width: 14px; height: 14px; }
+
+/* ── Buttons ── */
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 10px 20px; border: none; border-radius: var(--radius-sm);
+  font-family: var(--font); font-size: 14px; font-weight: 600;
+  cursor: pointer; transition: all 0.15s;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+  color: #fff;
+  box-shadow: 0 4px 16px var(--accent-glow);
+}
+.btn-primary:hover { transform: translateY(-1px); }
+.btn-primary:active { transform: translateY(0); }
+
+.btn-secondary {
+  background: var(--card); color: var(--text);
+  border: 1px solid var(--border);
+}
+.btn-secondary:hover { border-color: var(--border-active); }
+
+.btn-danger { background: var(--red-soft); color: var(--red); }
+.btn-danger:hover { background: rgba(239,68,68,0.2); }
+
+.btn svg { width: 16px; height: 16px; }
+
+/* ── Modal ── */
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 500;
+  background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; visibility: hidden; transition: all 0.25s;
+}
+.modal-overlay.active { opacity: 1; visibility: visible; }
+
+.modal {
+  width: 90%; max-width: 560px; max-height: 90vh;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); overflow-y: auto;
+  transform: scale(0.95); transition: transform 0.25s;
+}
+.modal-overlay.active .modal { transform: scale(1); }
+
+.modal-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 20px 24px; border-bottom: 1px solid var(--border);
+}
+
+.modal-title { font-size: 18px; font-weight: 700; }
+
+.modal-close {
+  width: 32px; height: 32px; border: none;
+  border-radius: 50%; background: rgba(255,255,255,0.06);
+  color: var(--text-secondary); font-size: 18px;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+}
+.modal-close:hover { background: rgba(255,255,255,0.1); }
+
+.modal-body { padding: 24px; }
+
+.modal-footer {
+  display: flex; justify-content: flex-end; gap: 12px;
+  padding: 16px 24px; border-top: 1px solid var(--border);
+}
+
+/* ── Form ── */
+.form-group { margin-bottom: 16px; }
+
+.form-label {
+  display: block; font-size: 13px; font-weight: 600;
+  color: var(--text-secondary); margin-bottom: 6px;
+}
+
+.form-input, .form-select, .form-textarea {
+  width: 100%; padding: 10px 14px;
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); color: var(--text);
+  font-family: var(--font); font-size: 14px;
+  transition: border-color 0.15s;
+}
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+  outline: none; border-color: var(--accent);
+}
+.form-textarea { resize: vertical; min-height: 80px; }
+.form-select { cursor: pointer; }
+.form-select option { background: var(--card); }
+
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+.form-hint {
+  font-size: 11px; color: var(--text-muted); margin-top: 4px;
+}
+
+/* ── External Search ── */
+.search-panel {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 24px; margin-bottom: 24px;
+}
+
+.search-panel-title {
+  font-size: 16px; font-weight: 600; margin-bottom: 4px;
+}
+
+.search-panel-desc {
+  font-size: 13px; color: var(--text-secondary); margin-bottom: 16px;
+}
+
+.search-bar-large {
+  display: flex; gap: 8px;
+}
+
+.search-bar-large input {
+  flex: 1; padding: 12px 16px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); color: var(--text);
+  font-family: var(--font); font-size: 14px;
+}
+.search-bar-large input:focus { outline: none; border-color: var(--accent); }
+
+.search-results {
+  margin-top: 16px; display: flex; flex-direction: column; gap: 8px;
+}
+
+.search-result-item {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 16px; background: var(--surface);
+  border: 1px solid var(--border); border-radius: var(--radius-sm);
+}
+
+.search-result-info { display: flex; align-items: center; gap: 12px; }
+.search-result-name { font-weight: 600; font-size: 14px; }
+.search-result-desc { font-size: 12px; color: var(--text-muted); }
+.search-result-status { font-size: 12px; font-weight: 600; }
+.search-result-status.exists { color: var(--yellow); }
+.search-result-status.available { color: var(--green); }
+
+/* ── Category Tags ── */
+.tag-list { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.tag {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 14px; background: var(--card);
+  border: 1px solid var(--border); border-radius: var(--radius-full);
+  font-size: 13px; font-weight: 500;
+}
+
+.tag-remove {
+  width: 16px; height: 16px; border: none;
+  border-radius: 50%; background: rgba(255,255,255,0.1);
+  color: var(--text-muted); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px;
+}
+.tag-remove:hover { background: var(--red-soft); color: var(--red); }
+
+/* ── Empty State ── */
+.empty-state {
+  display: flex; flex-direction: column; align-items: center;
+  padding: 60px 20px; text-align: center;
+}
+.empty-icon { font-size: 48px; margin-bottom: 12px; opacity: 0.4; }
+.empty-text { font-size: 14px; color: var(--text-muted); margin-bottom: 16px; }
+
+/* ── Toast ── */
+.toast {
+  position: fixed; bottom: 24px; right: 24px; z-index: 1000;
+  padding: 14px 20px; border-radius: var(--radius-sm);
+  font-size: 14px; font-weight: 500;
+  transform: translateY(80px); opacity: 0;
+  transition: all 0.3s ease;
+}
+.toast.show { transform: translateY(0); opacity: 1; }
+.toast.success { background: var(--green); color: #fff; }
+.toast.error { background: var(--red); color: #fff; }
+.toast.info { background: var(--accent); color: #fff; }
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .sidebar { display: none; }
+  .main { margin-left: 0; }
+  .content { padding: 16px; }
+  .topbar { padding: 16px; }
+  .form-row { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════ SIDEBAR ═══════ -->
+<aside class="sidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-logo">Lumiar Admin</div>
+    <div class="sidebar-sub">Painel de Gerenciamento</div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section">Principal</div>
+    <div class="nav-item active" data-page="dashboard">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      Dashboard
+    </div>
+
+    <div class="nav-section">Gerenciamento</div>
+    <div class="nav-item" data-page="apps">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M8 12h8M12 8v8"/></svg>
+      Apps
+      <span class="nav-badge" id="appsBadge">0</span>
+    </div>
+    <div class="nav-item" data-page="categories">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>
+      Categorias
+    </div>
+    <div class="nav-item" data-page="subcategories">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/><path d="M12 11v6M9 14h6"/></svg>
+      Sub-Categorias
+    </div>
+
+    <div class="nav-section">Ferramentas</div>
+    <div class="nav-item" data-page="search">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+      Pesquisar Apps
+    </div>
+    <div class="nav-item" data-page="export">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+      Exportar JSON
+    </div>
+  </nav>
+  <div class="sidebar-footer">Lumiar Store v1.0.0</div>
+</aside>
+
+<!-- ═══════ MAIN ═══════ -->
+<div class="main">
+
+  <!-- ── DASHBOARD ── -->
+  <div class="page active" id="page-dashboard">
+    <div class="topbar">
+      <div class="topbar-title">Dashboard</div>
+    </div>
+    <div class="content">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">Total de Apps</div>
+          <div class="stat-value accent" id="statApps">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Categorias</div>
+          <div class="stat-value green" id="statCategories">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Sub-Categorias</div>
+          <div class="stat-value" id="statSubcategories">0</div>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <div class="table-header">
+          <div class="table-title">Últimos Apps Adicionados</div>
+        </div>
+        <table>
+          <thead><tr><th>App</th><th>Versão</th><th>Categoria</th><th>Ações</th></tr></thead>
+          <tbody id="dashboardTable"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── APPS ── -->
+  <div class="page" id="page-apps">
+    <div class="topbar">
+      <div class="topbar-title">Gerenciar Apps</div>
+      <div class="topbar-actions">
+        <button class="btn btn-primary" onclick="openAppModal()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+          Novo App
+        </button>
+      </div>
+    </div>
+    <div class="content">
+      <div class="table-wrap">
+        <div class="table-header">
+          <div class="table-title">Todos os Apps</div>
+          <div class="table-search">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+            <input type="text" id="appSearchInput" placeholder="Filtrar apps..." oninput="filterAppsTable()">
+          </div>
+        </div>
+        <table>
+          <thead><tr><th>App</th><th>ID</th><th>Versão</th><th>Categoria</th><th>Ações</th></tr></thead>
+          <tbody id="appsTable"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── CATEGORIES ── -->
+  <div class="page" id="page-categories">
+    <div class="topbar">
+      <div class="topbar-title">Gerenciar Categorias</div>
+      <div class="topbar-actions">
+        <button class="btn btn-primary" onclick="openCategoryModal()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+          Nova Categoria
+        </button>
+      </div>
+    </div>
+    <div class="content">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Nome</th><th>Slug</th><th>Ícone</th><th>Apps</th><th>Ações</th></tr></thead>
+          <tbody id="categoriesTable"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SUBCATEGORIES ── -->
+  <div class="page" id="page-subcategories">
+    <div class="topbar">
+      <div class="topbar-title">Gerenciar Sub-Categorias</div>
+      <div class="topbar-actions">
+        <button class="btn btn-primary" onclick="openSubcategoryModal()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+          Nova Sub-Categoria
+        </button>
+      </div>
+    </div>
+    <div class="content">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Nome</th><th>Slug</th><th>Categoria Pai</th><th>Apps</th><th>Ações</th></tr></thead>
+          <tbody id="subcategoriesTable"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SEARCH ── -->
+  <div class="page" id="page-search">
+    <div class="topbar">
+      <div class="topbar-title">Pesquisar Apps Externos</div>
+    </div>
+    <div class="content">
+      <div class="search-panel">
+        <div class="search-panel-title">Verificar Disponibilidade</div>
+        <div class="search-panel-desc">Pesquise por um app para verificar se já existe na loja ou se pode ser adicionado.</div>
+        <div class="search-bar-large">
+          <input type="text" id="externalSearchInput" placeholder="Nome do app (ex: YouTube, Instagram, Spotify...)">
+          <button class="btn btn-primary" onclick="searchExternal()">Pesquisar</button>
+        </div>
+        <div class="search-results" id="searchResults"></div>
+      </div>
+      <div class="table-wrap">
+        <div class="table-header">
+          <div class="table-title">Apps Conhecidos (Referência)</div>
+        </div>
+        <table>
+          <thead><tr><th>Nome</th><th>Pacote</th><th>Categoria</th><th>Status</th></tr></thead>
+          <tbody id="knownAppsTable"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── EXPORT ── -->
+  <div class="page" id="page-export">
+    <div class="topbar">
+      <div class="topbar-title">Exportar Dados</div>
+    </div>
+    <div class="content">
+      <div class="search-panel">
+        <div class="search-panel-title">Exportar JSON</div>
+        <div class="search-panel-desc">Exporte os dados completos da loja em formato JSON pronto para uso no web app.</div>
+        <div style="display:flex;gap:12px;margin-top:16px;">
+          <button class="btn btn-primary" onclick="exportAppsJSON()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+            Exportar apps.json
+          </button>
+          <button class="btn btn-secondary" onclick="exportCategoriesJSON()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+            Exportar categorias.json
+          </button>
+          <button class="btn btn-secondary" onclick="exportAllJSON()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+            Exportar Tudo
+          </button>
+        </div>
+      </div>
+      <div class="search-panel" style="margin-top:16px;">
+        <div class="search-panel-title">Importar JSON</div>
+        <div class="search-panel-desc">Importe um arquivo JSON existente para carregar dados na loja.</div>
+        <div style="margin-top:16px;">
+          <input type="file" id="importFile" accept=".json" style="display:none" onchange="importJSON(event)">
+          <button class="btn btn-secondary" onclick="document.getElementById('importFile').click()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+            Importar Arquivo JSON
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══════ APP MODAL ═══════ -->
+<div class="modal-overlay" id="appModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="appModalTitle">Novo App</div>
+      <button class="modal-close" onclick="closeModal('appModal')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="appEditIdx">
+      <div class="form-group">
+        <label class="form-label">Nome do App *</label>
+        <input type="text" class="form-input" id="appName" placeholder="Ex: YouTube ReVanced">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">ID (Auto-gerado)</label>
+          <div style="display:flex;gap:8px;">
+            <input type="text" class="form-input" id="appId" readonly style="flex:1;font-family:'SF Mono',Consolas,monospace;font-size:13px;background:var(--surface);">
+            <button type="button" class="btn btn-secondary" onclick="regenerateId()" title="Gerar novo ID" style="padding:10px 12px;flex-shrink:0;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
+            </button>
+          </div>
+          <div class="form-hint">ID único de 16 caracteres — gerado automaticamente</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Versão *</label>
+          <input type="text" class="form-input" id="appVersion" placeholder="Ex: 19.16.39">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Categoria</label>
+          <select class="form-select" id="appCategory">
+            <option value="">Selecione...</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Sub-Categoria</label>
+          <select class="form-select" id="appSubcategory">
+            <option value="">Selecione...</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">URL do Logo</label>
+        <input type="text" class="form-input" id="appLogo" placeholder="https://exemplo.com/logo.png">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Screenshot 1</label>
+          <input type="text" class="form-input" id="appImg1" placeholder="https://exemplo.com/img1.png">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Screenshot 2</label>
+          <input type="text" class="form-input" id="appImg2" placeholder="https://exemplo.com/img2.png">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">URL do APK *</label>
+        <input type="text" class="form-input" id="appUrlApk" placeholder="https://exemplo.com/app.apk">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Descrição</label>
+        <textarea class="form-textarea" id="appDesc" placeholder="Descrição curta do app..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('appModal')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveApp()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ CATEGORY MODAL ═══════ -->
+<div class="modal-overlay" id="categoryModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="categoryModalTitle">Nova Categoria</div>
+      <button class="modal-close" onclick="closeModal('categoryModal')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="catEditIdx">
+      <div class="form-group">
+        <label class="form-label">Nome da Categoria *</label>
+        <input type="text" class="form-input" id="catName" placeholder="Ex: Jogos">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Slug</label>
+        <input type="text" class="form-input" id="catSlug" placeholder="Ex: jogos">
+        <div class="form-hint">Gerado automaticamente se vazio</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Ícone (emoji)</label>
+        <input type="text" class="form-input" id="catIcon" placeholder="Ex: 🎮">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Cor</label>
+        <input type="color" class="form-input" id="catColor" value="#9D4EDD" style="height:40px;padding:4px;">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('categoryModal')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveCategory()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ SUBCATEGORY MODAL ═══════ -->
+<div class="modal-overlay" id="subcategoryModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="subcategoryModalTitle">Nova Sub-Categoria</div>
+      <button class="modal-close" onclick="closeModal('subcategoryModal')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="subEditIdx">
+      <div class="form-group">
+        <label class="form-label">Nome da Sub-Categoria *</label>
+        <input type="text" class="form-input" id="subName" placeholder="Ex: FPS Online">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Slug</label>
+        <input type="text" class="form-input" id="subSlug" placeholder="Ex: fps-online">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Categoria Pai *</label>
+        <select class="form-select" id="subParent">
+          <option value="">Selecione...</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('subcategoryModal')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveSubcategory()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ TOAST ═══════ -->
+<div class="toast" id="toast"></div>
+
+<script>
+/* ══════════════════════════════════════════
+   STATE
+   ══════════════════════════════════════════ */
+
+let apps = [];
+let categories = [
+  { nome: 'Jogos', slug: 'jogos', icon: '🎮', color: '#FF6B6B' },
+  { nome: 'Social', slug: 'social', icon: '💬', color: '#4ECDC4' },
+  { nome: 'Utilidades', slug: 'utilidades', icon: '🔧', color: '#45B7D1' },
+  { nome: 'Mídia', slug: 'midia', icon: '🎬', color: '#96CEB4' },
+  { nome: 'Produtividade', slug: 'produtividade', icon: '📋', color: '#FFEAA7' },
+  { nome: 'Personalização', slug: 'personalizacao', icon: '🎨', color: '#DDA0DD' }
+];
+let subcategories = [
+  { nome: 'FPS Online', slug: 'fps-online', parent: 'jogos' },
+  { nome: 'RPG', slug: 'rpg', parent: 'jogos' },
+  { nome: 'Redes Sociais', slug: 'redes-sociais', parent: 'social' },
+  { nome: 'Players', slug: 'players', parent: 'midia' }
+];
+
+const knownApps = [
+  { nome: 'YouTube ReVanced', pacote: 'com.google.android.youtube', categoria: 'Mídia' },
+  { nome: 'Instagram ReVanced', pacote: 'com.instagram.android', categoria: 'Social' },
+  { nome: 'WhatsApp Plus', pacote: 'com.whatsapp', categoria: 'Social' },
+  { nome: 'Spotify Premium', pacote: 'com.spotify.music', categoria: 'Mídia' },
+  { nome: 'Telegram', pacote: 'org.telegram.messenger', categoria: 'Social' },
+  { nome: 'VLC Player', pacote: 'org.videolan.vlc', categoria: 'Mídia' },
+  { nome: 'Termux', pacote: 'com.termux', categoria: 'Utilidades' },
+  { nome: 'Nova Launcher', pacote: 'com.teslacoilsw.launcher', categoria: 'Personalização' },
+  { nome: 'Bromite', pacote: 'org.bromite.bromite', categoria: 'Utilidades' },
+  { nome: 'NewPipe', pacote: 'org.schabi.newpipe', categoria: 'Mídia' },
+  { nome: 'F-Droid', pacote: 'org.fdroid.fdroid', categoria: 'Utilidades' },
+  { nome: 'Aurora Store', pacote: 'com.aurora.store', categoria: 'Utilidades' },
+  { nome: 'MIUI Camera', pacote: 'com.android.camera', categoria: 'Utilidades' },
+  { nome: 'GCam', pacote: 'com.google.android.GoogleCamera', categoria: 'Utilidades' },
+  { nome: 'MX Player', pacote: 'com.mxtech.videoplayer.ad', categoria: 'Mídia' }
+];
+
+/* ══════════════════════════════════════════
+   NAVIGATION
+   ══════════════════════════════════════════ */
+
+document.querySelectorAll('.nav-item').forEach(item => {
+  item.addEventListener('click', () => {
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    item.classList.add('active');
+    const page = item.dataset.page;
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('page-' + page).classList.add('active');
+  });
+});
+
+/* ══════════════════════════════════════════
+   RENDER
+   ══════════════════════════════════════════ */
+
+function renderAll() {
+  renderDashboard();
+  renderAppsTable();
+  renderCategoriesTable();
+  renderSubcategoriesTable();
+  renderKnownApps();
+  updateBadges();
+  updateSelects();
+}
+
+function renderDashboard() {
+  document.getElementById('statApps').textContent = apps.length;
+  document.getElementById('statCategories').textContent = categories.length;
+  document.getElementById('statSubcategories').textContent = subcategories.length;
+
+  const tbody = document.getElementById('dashboardTable');
+  if (!apps.length) {
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:32px;">Nenhum app adicionado ainda.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = apps.slice(-5).reverse().map(app => `
+    <tr>
+      <td><div style="display:flex;align-items:center;gap:10px;">
+        <img class="table-logo" src="${esc(app.logo || '')}" onerror="this.style.background='var(--accent-soft)'">
+        <span class="table-name">${esc(app.NomeAPP)}</span>
+      </div></td>
+      <td class="table-version">${esc(app.Versao)}</td>
+      <td><span class="badge badge-purple">${esc(app.categoria || 'Sem categoria')}</span></td>
+      <td><div class="actions-cell">
+        <button class="btn-icon edit" onclick="editApp(${apps.indexOf(app)})" title="Editar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+      </div></td>
+    </tr>`).join('');
+}
+
+function renderAppsTable() {
+  const filter = document.getElementById('appSearchInput').value.toLowerCase();
+  const filtered = apps.filter(a =>
+    a.NomeAPP.toLowerCase().includes(filter) ||
+    a.ID.toLowerCase().includes(filter) ||
+    (a.categoria || '').toLowerCase().includes(filter)
+  );
+  const tbody = document.getElementById('appsTable');
+  if (!filtered.length) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:32px;">Nenhum app encontrado.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = filtered.map((app, i) => {
+    const realIdx = apps.indexOf(app);
+    return `
+    <tr>
+      <td><div style="display:flex;align-items:center;gap:10px;">
+        <img class="table-logo" src="${esc(app.logo || '')}" onerror="this.style.background='var(--accent-soft)'">
+        <div><div class="table-name">${esc(app.NomeAPP)}</div></div>
+      </div></td>
+      <td class="table-id">${esc(app.ID)}</td>
+      <td class="table-version">${esc(app.Versao)}</td>
+      <td><span class="badge badge-purple">${esc(app.categoria || '-')}</span></td>
+      <td><div class="actions-cell">
+        <button class="btn-icon edit" onclick="editApp(${realIdx})" title="Editar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+        <button class="btn-icon delete" onclick="deleteApp(${realIdx})" title="Excluir"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg></button>
+      </div></td>
+    </tr>`;
+  }).join('');
+}
+
+function renderCategoriesTable() {
+  const tbody = document.getElementById('categoriesTable');
+  if (!categories.length) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:32px;">Nenhuma categoria criada.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = categories.map((cat, i) => {
+    const count = apps.filter(a => a.categoria === cat.nome).length;
+    return `
+    <tr>
+      <td><div style="display:flex;align-items:center;gap:10px;">
+        <span style="font-size:20px;">${cat.icon || '📁'}</span>
+        <span class="table-name">${esc(cat.nome)}</span>
+      </div></td>
+      <td class="table-id">${esc(cat.slug)}</td>
+      <td><span style="display:inline-block;width:24px;height:24px;border-radius:6px;background:${cat.color || '#666'}"></span></td>
+      <td><span class="badge badge-blue">${count}</span></td>
+      <td><div class="actions-cell">
+        <button class="btn-icon edit" onclick="editCategory(${i})" title="Editar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+        <button class="btn-icon delete" onclick="deleteCategory(${i})" title="Excluir"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg></button>
+      </div></td>
+    </tr>`;
+  }).join('');
+}
+
+function renderSubcategoriesTable() {
+  const tbody = document.getElementById('subcategoriesTable');
+  if (!subcategories.length) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:32px;">Nenhuma sub-categoria criada.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = subcategories.map((sub, i) => {
+    const parentCat = categories.find(c => c.slug === sub.parent);
+    const count = apps.filter(a => a.subcategoria === sub.nome).length;
+    return `
+    <tr>
+      <td class="table-name">${esc(sub.nome)}</td>
+      <td class="table-id">${esc(sub.slug)}</td>
+      <td><span class="badge badge-green">${parentCat ? parentCat.icon + ' ' + parentCat.nome : sub.parent}</span></td>
+      <td><span class="badge badge-blue">${count}</span></td>
+      <td><div class="actions-cell">
+        <button class="btn-icon edit" onclick="editSubcategory(${i})" title="Editar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+        <button class="btn-icon delete" onclick="deleteSubcategory(${i})" title="Excluir"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg></button>
+      </div></td>
+    </tr>`;
+  }).join('');
+}
+
+function renderKnownApps() {
+  const tbody = document.getElementById('knownAppsTable');
+  tbody.innerHTML = knownApps.map(app => {
+    const exists = apps.some(a => a.ID === app.pacote || a.NomeAPP.toLowerCase().includes(app.nome.toLowerCase()));
+    return `
+    <tr>
+      <td class="table-name">${esc(app.nome)}</td>
+      <td class="table-id">${esc(app.pacote)}</td>
+      <td><span class="badge badge-purple">${esc(app.categoria)}</span></td>
+      <td><span class="search-result-status ${exists ? 'exists' : 'available'}">${exists ? 'Na Loja' : 'Disponível'}</span></td>
+    </tr>`;
+  }).join('');
+}
+
+function updateBadges() {
+  document.getElementById('appsBadge').textContent = apps.length;
+}
+
+function updateSelects() {
+  const catOptions = categories.map(c => `<option value="${esc(c.nome)}">${c.icon} ${esc(c.nome)}</option>`).join('');
+  const catSelects = [document.getElementById('appCategory'), document.getElementById('subParent')];
+  catSelects.forEach(sel => {
+    if (!sel) return;
+    const val = sel.value;
+    sel.innerHTML = '<option value="">Selecione...</option>' + catOptions;
+    sel.value = val;
+  });
+
+  const subCatOptions = subcategories.map(s => `<option value="${esc(s.nome)}">${esc(s.nome)}</option>`).join('');
+  const subSel = document.getElementById('appSubcategory');
+  if (subSel) {
+    const val = subSel.value;
+    subSel.innerHTML = '<option value="">Selecione...</option>' + subCatOptions;
+    subSel.value = val;
+  }
+}
+
+/* ══════════════════════════════════════════
+   APP CRUD
+   ══════════════════════════════════════════ */
+
+function openAppModal(idx) {
+  document.getElementById('appEditIdx').value = idx !== undefined ? idx : '';
+  document.getElementById('appModalTitle').textContent = idx !== undefined ? 'Editar App' : 'Novo App';
+  document.getElementById('appName').value = idx !== undefined ? apps[idx].NomeAPP : '';
+  document.getElementById('appId').value = idx !== undefined ? apps[idx].ID : generateId();
+  document.getElementById('appVersion').value = idx !== undefined ? apps[idx].Versao : '';
+  document.getElementById('appLogo').value = idx !== undefined ? (apps[idx].logo || '') : '';
+  document.getElementById('appImg1').value = idx !== undefined ? (apps[idx].img1 || '') : '';
+  document.getElementById('appImg2').value = idx !== undefined ? (apps[idx].img2 || '') : '';
+  document.getElementById('appUrlApk').value = idx !== undefined ? (apps[idx].url_apk || '') : '';
+  document.getElementById('appDesc').value = idx !== undefined ? (apps[idx].descricao || '') : '';
+  updateSelects();
+  setTimeout(() => {
+    document.getElementById('appCategory').value = idx !== undefined ? (apps[idx].categoria || '') : '';
+    document.getElementById('appSubcategory').value = idx !== undefined ? (apps[idx].subcategoria || '') : '';
+  }, 10);
+  openModal('appModal');
+}
+
+function editApp(idx) { openAppModal(idx); }
+
+function saveApp() {
+  const name = document.getElementById('appName').value.trim();
+  const id = document.getElementById('appId').value.trim();
+  const version = document.getElementById('appVersion').value.trim();
+  const urlApk = document.getElementById('appUrlApk').value.trim();
+
+  if (!name || !version || !urlApk) {
+    toast('Preencha todos os campos obrigatórios.', 'error');
+    return;
+  }
+
+  const obj = {
+    ID: id,
+    NomeAPP: name,
+    Versao: version,
+    logo: document.getElementById('appLogo').value.trim(),
+    img1: document.getElementById('appImg1').value.trim(),
+    img2: document.getElementById('appImg2').value.trim(),
+    url_apk: urlApk,
+    descricao: document.getElementById('appDesc').value.trim(),
+    categoria: document.getElementById('appCategory').value,
+    subcategoria: document.getElementById('appSubcategory').value
+  };
+
+  const editIdx = document.getElementById('appEditIdx').value;
+  if (editIdx !== '') {
+    apps[parseInt(editIdx)] = obj;
+    toast('App atualizado com sucesso!', 'success');
+  } else {
+    apps.push(obj);
+    toast('App adicionado com sucesso!', 'success');
+  }
+
+  closeModal('appModal');
+  renderAll();
+  saveToStorage();
+}
+
+function deleteApp(idx) {
+  if (confirm(`Excluir "${apps[idx].NomeAPP}"?`)) {
+    apps.splice(idx, 1);
+    renderAll();
+    saveToStorage();
+    toast('App excluído.', 'info');
+  }
+}
+
+function filterAppsTable() { renderAppsTable(); }
+
+/* ══════════════════════════════════════════
+   CATEGORY CRUD
+   ══════════════════════════════════════════ */
+
+function openCategoryModal(idx) {
+  document.getElementById('catEditIdx').value = idx !== undefined ? idx : '';
+  document.getElementById('categoryModalTitle').textContent = idx !== undefined ? 'Editar Categoria' : 'Nova Categoria';
+  document.getElementById('catName').value = idx !== undefined ? categories[idx].nome : '';
+  document.getElementById('catSlug').value = idx !== undefined ? categories[idx].slug : '';
+  document.getElementById('catIcon').value = idx !== undefined ? (categories[idx].icon || '') : '';
+  document.getElementById('catColor').value = idx !== undefined ? (categories[idx].color || '#9D4EDD') : '#9D4EDD';
+  openModal('categoryModal');
+}
+
+function editCategory(idx) { openCategoryModal(idx); }
+
+function saveCategory() {
+  const name = document.getElementById('catName').value.trim();
+  if (!name) { toast('Nome da categoria é obrigatório.', 'error'); return; }
+
+  let slug = document.getElementById('catSlug').value.trim();
+  if (!slug) slug = name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '-');
+
+  const obj = {
+    nome: name,
+    slug: slug,
+    icon: document.getElementById('catIcon').value.trim() || '📁',
+    color: document.getElementById('catColor').value
+  };
+
+  const editIdx = document.getElementById('catEditIdx').value;
+  if (editIdx !== '') {
+    categories[parseInt(editIdx)] = obj;
+    toast('Categoria atualizada!', 'success');
+  } else {
+    categories.push(obj);
+    toast('Categoria criada!', 'success');
+  }
+
+  closeModal('categoryModal');
+  renderAll();
+  saveToStorage();
+}
+
+function deleteCategory(idx) {
+  if (confirm(`Excluir categoria "${categories[idx].nome}"?`)) {
+    categories.splice(idx, 1);
+    renderAll();
+    saveToStorage();
+    toast('Categoria excluída.', 'info');
+  }
+}
+
+/* ══════════════════════════════════════════
+   SUBCATEGORY CRUD
+   ══════════════════════════════════════════ */
+
+function openSubcategoryModal(idx) {
+  document.getElementById('subEditIdx').value = idx !== undefined ? idx : '';
+  document.getElementById('subcategoryModalTitle').textContent = idx !== undefined ? 'Editar Sub-Categoria' : 'Nova Sub-Categoria';
+  document.getElementById('subName').value = idx !== undefined ? subcategories[idx].nome : '';
+  document.getElementById('subSlug').value = idx !== undefined ? subcategories[idx].slug : '';
+  updateSelects();
+  setTimeout(() => {
+    document.getElementById('subParent').value = idx !== undefined ? subcategories[idx].parent : '';
+  }, 10);
+  openModal('subcategoryModal');
+}
+
+function editSubcategory(idx) { openSubcategoryModal(idx); }
+
+function saveSubcategory() {
+  const name = document.getElementById('subName').value.trim();
+  const parent = document.getElementById('subParent').value;
+  if (!name || !parent) { toast('Preencha todos os campos.', 'error'); return; }
+
+  let slug = document.getElementById('subSlug').value.trim();
+  if (!slug) slug = name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '-');
+
+  const obj = { nome: name, slug, parent };
+
+  const editIdx = document.getElementById('subEditIdx').value;
+  if (editIdx !== '') {
+    subcategories[parseInt(editIdx)] = obj;
+    toast('Sub-categoria atualizada!', 'success');
+  } else {
+    subcategories.push(obj);
+    toast('Sub-categoria criada!', 'success');
+  }
+
+  closeModal('subcategoryModal');
+  renderAll();
+  saveToStorage();
+}
+
+function deleteSubcategory(idx) {
+  if (confirm(`Excluir sub-categoria "${subcategories[idx].nome}"?`)) {
+    subcategories.splice(idx, 1);
+    renderAll();
+    saveToStorage();
+    toast('Sub-categoria excluída.', 'info');
+  }
+}
+
+/* ══════════════════════════════════════════
+   SEARCH
+   ══════════════════════════════════════════ */
+
+function searchExternal() {
+  const q = document.getElementById('externalSearchInput').value.trim().toLowerCase();
+  const results = document.getElementById('searchResults');
+  if (!q) { results.innerHTML = ''; return; }
+
+  const matches = knownApps.filter(a =>
+    a.nome.toLowerCase().includes(q) ||
+    a.pacote.toLowerCase().includes(q)
+  );
+
+  const inStore = apps.filter(a =>
+    a.NomeAPP.toLowerCase().includes(q) ||
+    a.ID.toLowerCase().includes(q)
+  );
+
+  let html = '';
+
+  if (inStore.length) {
+    html += `<div style="font-size:13px;font-weight:600;color:var(--yellow);margin-bottom:8px;">Na Loja (${inStore.length})</div>`;
+    inStore.forEach(app => {
+      html += `<div class="search-result-item">
+        <div class="search-result-info">
+          <img src="${esc(app.logo || '')}" style="width:32px;height:32px;border-radius:8px;border:1px solid var(--border)" onerror="this.style.display='none'">
+          <div><div class="search-result-name">${esc(app.NomeAPP)}</div><div class="search-result-desc">${esc(app.ID)}</div></div>
+        </div>
+        <span class="search-result-status exists">Já existe</span>
+      </div>`;
+    });
+  }
+
+  if (matches.length) {
+    html += `<div style="font-size:13px;font-weight:600;color:var(--green);margin-top:12px;margin-bottom:8px;">Apps Conhecidos (${matches.length})</div>`;
+    matches.forEach(app => {
+      const exists = apps.some(a => a.ID === app.pacote);
+      html += `<div class="search-result-item">
+        <div class="search-result-info">
+          <div><div class="search-result-name">${esc(app.nome)}</div><div class="search-result-desc">${esc(app.pacote)}</div></div>
+        </div>
+        <span class="search-result-status ${exists ? 'exists' : 'available'}">${exists ? 'Na Loja' : 'Disponível'}</span>
+      </div>`;
+    });
+  }
+
+  if (!matches.length && !inStore.length) {
+    html = '<div style="text-align:center;padding:24px;color:var(--text-muted);">Nenhum resultado encontrado.</div>';
+  }
+
+  results.innerHTML = html;
+}
+
+/* ══════════════════════════════════════════
+   EXPORT / IMPORT
+   ══════════════════════════════════════════ */
+
+function exportAppsJSON() {
+  downloadJSON(apps, 'apps.json');
+  toast('apps.json exportado!', 'success');
+}
+
+function exportCategoriesJSON() {
+  const data = { categories, subcategories };
+  downloadJSON(data, 'categorias.json');
+  toast('categorias.json exportado!', 'success');
+}
+
+function exportAllJSON() {
+  const data = { apps, categories, subcategories, version: '1.0.0' };
+  downloadJSON(data, 'lumiar-data.json');
+  toast('Dados completos exportados!', 'success');
+}
+
+function downloadJSON(data, filename) {
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function importJSON(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (Array.isArray(data)) {
+        apps = data;
+      } else {
+        if (data.apps) apps = data.apps;
+        if (data.categories) categories = data.categories;
+        if (data.subcategories) subcategories = data.subcategories;
+      }
+      renderAll();
+      saveToStorage();
+      toast('Dados importados com sucesso!', 'success');
+    } catch (err) {
+      toast('Erro ao importar JSON: ' + err.message, 'error');
+    }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
+/* ══════════════════════════════════════════
+   STORAGE
+   ══════════════════════════════════════════ */
+
+function saveToStorage() {
+  localStorage.setItem('lumiar_apps', JSON.stringify(apps));
+  localStorage.setItem('lumiar_categories', JSON.stringify(categories));
+  localStorage.setItem('lumiar_subcategories', JSON.stringify(subcategories));
+}
+
+function loadFromStorage() {
+  try {
+    const a = localStorage.getItem('lumiar_apps');
+    const c = localStorage.getItem('lumiar_categories');
+    const s = localStorage.getItem('lumiar_subcategories');
+    if (a) apps = JSON.parse(a);
+    if (c) categories = JSON.parse(c);
+    if (s) subcategories = JSON.parse(s);
+  } catch (e) { /* ignore */ }
+}
+
+/* ══════════════════════════════════════════
+   UTILS
+   ══════════════════════════════════════════ */
+
+function openModal(id) { document.getElementById(id).classList.add('active'); }
+function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+/* ══════════════════════════════════════════
+   ID GENERATION (16 chars robustos)
+   ══════════════════════════════════════════ */
+
+function generateId() {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  const symbols = '!@#$%^&*';
+  let id = '';
+  const arr = new Uint8Array(16);
+  crypto.getRandomValues(arr);
+  for (let i = 0; i < 16; i++) {
+    if (i === 4 || i === 10) {
+      id += symbols[arr[i] % symbols.length];
+    } else {
+      id += chars[arr[i] % chars.length];
+    }
+  }
+  return id;
+}
+
+function regenerateId() {
+  document.getElementById('appId').value = generateId();
+}
+
+function esc(s) {
+  if (!s) return '';
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+function toast(msg, type) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast ' + type + ' show';
+  setTimeout(() => el.classList.remove('show'), 3000);
+}
+
+/* ══════════════════════════════════════════
+   INIT
+   ══════════════════════════════════════════ */
+
+loadFromStorage();
+renderAll();
+</script>
+</body>
+</html>
