@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lumiar Store - Painel Admin</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background: #0A0A14; color: #fff; min-height: 100vh; }
+
+        .header { background: linear-gradient(135deg, #8A2BE2, #6A1DB5); padding: 20px 30px; display: flex; justify-content: space-between; align-items: center; }
+        .header h1 { font-size: 22px; font-weight: 700; }
+        .header span { color: #B266FF; font-size: 13px; }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 30px; }
+
+        .tabs { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; }
+        .tab { padding: 10px 20px; border-radius: 8px; border: 1px solid #252550; background: #1A1A35; color: #9999BB; cursor: pointer; font-size: 14px; font-weight: 500; transition: all 0.2s; }
+        .tab:hover { border-color: #8A2BE2; }
+        .tab.active { background: #8A2BE2; color: #fff; border-color: #8A2BE2; }
+
+        .panel { display: none; }
+        .panel.active { display: block; }
+
+        .card { background: #1A1A35; border: 1px solid #252550; border-radius: 12px; padding: 24px; margin-bottom: 20px; }
+        .card h2 { font-size: 18px; margin-bottom: 16px; color: #fff; }
+        .card h3 { font-size: 14px; margin-bottom: 12px; color: #9999BB; text-transform: uppercase; letter-spacing: 1px; }
+
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; font-size: 13px; color: #9999BB; margin-bottom: 6px; }
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid #252550;
+            background: #12122A; color: #fff; font-size: 14px; font-family: inherit;
+        }
+        .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+            outline: none; border-color: #8A2BE2;
+        }
+        .form-group textarea { min-height: 80px; resize: vertical; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        @media (max-width: 600px) { .form-row { grid-template-columns: 1fr; } }
+
+        .btn { padding: 10px 24px; border-radius: 8px; border: none; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+        .btn-primary { background: #8A2BE2; color: #fff; }
+        .btn-primary:hover { background: #6A1DB5; }
+        .btn-danger { background: #FF4757; color: #fff; }
+        .btn-danger:hover { background: #e03e4d; }
+        .btn-secondary { background: #252550; color: #9999BB; }
+        .btn-secondary:hover { background: #333366; }
+        .btn-group { display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
+
+        .app-list { list-style: none; }
+        .app-item { display: flex; align-items: center; gap: 14px; padding: 14px; border-bottom: 1px solid #252550; transition: background 0.2s; }
+        .app-item:hover { background: #12122A; }
+        .app-item:last-child { border-bottom: none; }
+        .app-logo { width: 44px; height: 44px; border-radius: 10px; background: #8A2BE2; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 18px; color: #fff; flex-shrink: 0; }
+        .app-info { flex: 1; min-width: 0; }
+        .app-name { font-weight: 600; font-size: 15px; }
+        .app-meta { font-size: 12px; color: #9999BB; margin-top: 2px; }
+        .app-actions { display: flex; gap: 6px; }
+        .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 500; background: rgba(138,43,226,0.2); color: #B266FF; }
+
+        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
+        .stat-card { background: #1A1A35; border: 1px solid #252550; border-radius: 12px; padding: 20px; text-align: center; }
+        .stat-value { font-size: 28px; font-weight: 700; color: #8A2BE2; }
+        .stat-label { font-size: 13px; color: #9999BB; margin-top: 4px; }
+
+        .json-preview { background: #0A0A14; border: 1px solid #252550; border-radius: 8px; padding: 16px; font-family: 'Fira Code', monospace; font-size: 12px; color: #9999BB; max-height: 400px; overflow: auto; white-space: pre-wrap; word-break: break-all; }
+
+        .toast { position: fixed; bottom: 20px; right: 20px; background: #8A2BE2; color: #fff; padding: 12px 24px; border-radius: 8px; font-size: 14px; font-weight: 500; display: none; z-index: 1000; animation: slideIn 0.3s ease; }
+        @keyframes slideIn { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+        .empty { text-align: center; padding: 40px; color: #555577; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div>
+        <h1>Lumiar Store</h1>
+        <span>Painel de Administração v1.0.5</span>
+    </div>
+    <a href="../JSON/apps.json" target="_blank" style="color:#B266FF;text-decoration:none;font-size:13px;">Ver JSON &rarr;</a>
+</div>
+
+<div class="container">
+    <div class="tabs">
+        <div class="tab active" onclick="showTab('dashboard')">Dashboard</div>
+        <div class="tab" onclick="showTab('apps')">Apps</div>
+        <div class="tab" onclick="showTab('add')">Adicionar App</div>
+        <div class="tab" onclick="showTab('version')">Versão</div>
+        <div class="tab" onclick="showTab('json')">JSON Bruto</div>
+    </div>
+
+    <!-- Dashboard -->
+    <div id="dashboard" class="panel active">
+        <div class="stats">
+            <div class="stat-card"><div class="stat-value" id="totalApps">0</div><div class="stat-label">Total de Apps</div></div>
+            <div class="stat-card"><div class="stat-value" id="totalCats">0</div><div class="stat-label">Categorias</div></div>
+            <div class="stat-card"><div class="stat-value" id="totalDest">0</div><div class="stat-label">Destaques</div></div>
+            <div class="stat-card"><div class="stat-value" id="storeVersion">--</div><div class="stat-label">Versão da Loja</div></div>
+        </div>
+        <div class="card">
+            <h2>Últimos Apps Adicionados</h2>
+            <ul class="app-list" id="recentApps"></ul>
+        </div>
+    </div>
+
+    <!-- Apps List -->
+    <div id="apps" class="panel">
+        <div class="card">
+            <h2>Gerenciar Apps</h2>
+            <ul class="app-list" id="appsList"></ul>
+        </div>
+    </div>
+
+    <!-- Add App -->
+    <div id="add" class="panel">
+        <div class="card">
+            <h2>Adicionar Novo App</h2>
+            <form id="addForm" onsubmit="addApp(event)">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>ID do App</label>
+                        <input type="text" id="fID" placeholder="com.exemplo.meuapp" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Nome do App</label>
+                        <input type="text" id="fNome" placeholder="Meu App" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Descrição</label>
+                    <textarea id="fDesc" placeholder="Descrição curta do app." required></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Categoria</label>
+                        <select id="fCategoria" required></select>
+                    </div>
+                    <div class="form-group">
+                        <label>Versão</label>
+                        <input type="text" id="fVersao" placeholder="v1.0.0" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>URL da Logo (ImgBB)</label>
+                    <input type="url" id="fLogo" placeholder="https://i.ibb.co/exemplo/logo.png">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>URL Screenshot 1</label>
+                        <input type="url" id="fImg1" placeholder="https://i.ibb.co/exemplo/screen1.png">
+                    </div>
+                    <div class="form-group">
+                        <label>URL Screenshot 2</label>
+                        <input type="url" id="fImg2" placeholder="https://i.ibb.co/exemplo/screen2.png">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>URL do APK</label>
+                    <input type="url" id="fUrl" placeholder="https://exemplo.com/meuapp.apk" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Categoria Slug</label>
+                        <input type="text" id="fCatSlug" placeholder="utilidades">
+                    </div>
+                    <div class="form-group">
+                        <label>Subcategoria Slug</label>
+                        <input type="text" id="fSubSlug" placeholder="opcoes">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label><input type="checkbox" id="fDestaque"> Marcar como Destaque</label>
+                </div>
+                <div class="btn-group">
+                    <button type="submit" class="btn btn-primary">Adicionar App</button>
+                    <button type="reset" class="btn btn-secondary">Limpar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Version -->
+    <div id="version" class="panel">
+        <div class="card">
+            <h2>Informações da Versão</h2>
+            <div class="form-group">
+                <label>Versão Atual</label>
+                <input type="text" id="vVersao" placeholder="1.0.5">
+            </div>
+            <div class="form-group">
+                <label>URL de Download</label>
+                <input type="url" id="vDownload" placeholder="https://github.com/TGTiler/Lumiar/releases/latest/download/Lumiar.apk">
+            </div>
+            <div class="form-group">
+                <label>Changelog</label>
+                <textarea id="vChangelog" placeholder="Descrição das mudanças nesta versão"></textarea>
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-primary" onclick="saveVersion()">Salvar Versão</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JSON Raw -->
+    <div id="json" class="panel">
+        <div class="card">
+            <h2>JSON Bruto (apps.json)</h2>
+            <div class="btn-group" style="margin-bottom:16px;">
+                <button class="btn btn-secondary" onclick="copyJson()">Copiar JSON</button>
+                <button class="btn btn-primary" onclick="downloadJson()">Baixar JSON</button>
+            </div>
+            <div class="json-preview" id="jsonPreview">Carregando...</div>
+        </div>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const GITHUB_JSON = 'https://raw.githubusercontent.com/TGTiler/Lumiar/main/JSON/apps.json';
+const GITHUB_CATS = 'https://raw.githubusercontent.com/TGTiler/Lumiar/main/JSON/categorias.json';
+const GITHUB_VER = 'https://raw.githubusercontent.com/TGTiler/Lumiar/main/JSON/Version.json';
+
+let appsData = [];
+let catsData = [];
+
+async function init() {
+    await Promise.all([loadApps(), loadCategories(), loadVersion()]);
+    renderDashboard();
+    renderAppsList();
+    populateCategorySelect();
+    renderJson();
+}
+
+async function loadApps() {
+    try { const r = await fetch(GITHUB_JSON); appsData = await r.json(); } catch(e) { appsData = []; console.error(e); }
+}
+
+async function loadCategories() {
+    try { const r = await fetch(GITHUB_CATS); const d = await r.json(); catsData = d.categories || []; } catch(e) { catsData = []; }
+}
+
+async function loadVersion() {
+    try {
+        const r = await fetch(GITHUB_VER);
+        const d = await r.json();
+        document.getElementById('vVersao').value = d.Versao || '';
+        document.getElementById('vDownload').value = d.Download || '';
+        document.getElementById('vChangelog').value = d.Changelog || '';
+        document.getElementById('storeVersion').textContent = d.Versao || '--';
+    } catch(e) {}
+}
+
+function showTab(id) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.querySelector(`.tab[onclick="showTab('${id}')"]`).classList.add('active');
+    document.getElementById(id).classList.add('active');
+}
+
+function renderDashboard() {
+    document.getElementById('totalApps').textContent = appsData.length;
+    document.getElementById('totalCats').textContent = catsData.length;
+    document.getElementById('totalDest').textContent = appsData.filter(a => a.Destaque).length;
+
+    const recent = [...appsData].slice(-5).reverse();
+    const list = document.getElementById('recentApps');
+    list.innerHTML = recent.length ? recent.map(a => `
+        <li class="app-item">
+            <div class="app-logo">${(a.NomeAPP||'?')[0]}</div>
+            <div class="app-info">
+                <div class="app-name">${a.NomeAPP}</div>
+                <div class="app-meta">v${a.Versao} &middot; ${a.categoria}</div>
+            </div>
+            <span class="badge">${a.Destaque ? 'Destaque' : 'App'}</span>
+        </li>
+    `).join('') : '<div class="empty">Nenhum app encontrado</div>';
+}
+
+function renderAppsList() {
+    const list = document.getElementById('appsList');
+    list.innerHTML = appsData.length ? appsData.map((a, i) => `
+        <li class="app-item">
+            <div class="app-logo">${(a.NomeAPP||'?')[0]}</div>
+            <div class="app-info">
+                <div class="app-name">${a.NomeAPP}</div>
+                <div class="app-meta">${a.ID} &middot; v${a.Versao} &middot; ${a.categoria}</div>
+            </div>
+            <div class="app-actions">
+                ${a.Destaque ? '<span class="badge">Destaque</span>' : ''}
+                <button class="btn btn-danger" style="padding:6px 12px;font-size:12px;" onclick="removeApp(${i})">Remover</button>
+            </div>
+        </li>
+    `).join('') : '<div class="empty">Nenhum app encontrado</div>';
+}
+
+function populateCategorySelect() {
+    const sel = document.getElementById('fCategoria');
+    sel.innerHTML = catsData.map(c => `<option value="${c.nome}">${c.icon} ${c.nome}</option>`).join('');
+}
+
+function renderJson() {
+    document.getElementById('jsonPreview').textContent = JSON.stringify(appsData, null, 2);
+}
+
+function addApp(e) {
+    e.preventDefault();
+    const newApp = {
+        ID: document.getElementById('fID').value,
+        NomeAPP: document.getElementById('fNome').value,
+        Descricao: document.getElementById('fDesc').value,
+        CategoriaSlug: document.getElementById('fCatSlug').value,
+        SubcategoriaSlug: document.getElementById('fSubSlug').value,
+        Versao: document.getElementById('fVersao').value,
+        logo: document.getElementById('fLogo').value,
+        img1: document.getElementById('fImg1').value,
+        img2: document.getElementById('fImg2').value,
+        url_apk: document.getElementById('fUrl').value,
+        categoria: document.getElementById('fCategoria').value,
+        subcategoria: document.getElementById('fSubSlug').value,
+        Destaque: document.getElementById('fDestaque').checked
+    };
+    appsData.push(newApp);
+    renderDashboard();
+    renderAppsList();
+    renderJson();
+    e.target.reset();
+    showToast('App adicionado! Copie o JSON abaixo para atualizar no GitHub.');
+}
+
+function removeApp(index) {
+    if (!confirm(`Remover "${appsData[index].NomeAPP}"?`)) return;
+    appsData.splice(index, 1);
+    renderDashboard();
+    renderAppsList();
+    renderJson();
+    showToast('App removido! Copie o JSON abaixo para atualizar no GitHub.');
+}
+
+function saveVersion() {
+    const ver = {
+        Versao: document.getElementById('vVersao').value,
+        Download: document.getElementById('vDownload').value,
+        Changelog: document.getElementById('vChangelog').value
+    };
+    document.getElementById('storeVersion').textContent = ver.Versao;
+    showToast('Versão salva! Copie o JSON e atualize o Version.json no GitHub.');
+    console.log('Version.json:', JSON.stringify(ver, null, 2));
+}
+
+function copyJson() {
+    navigator.clipboard.writeText(JSON.stringify(appsData, null, 2));
+    showToast('JSON copiado para a área de transferência!');
+}
+
+function downloadJson() {
+    const blob = new Blob([JSON.stringify(appsData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'apps.json'; a.click();
+    URL.revokeObjectURL(url);
+    showToast('JSON baixado!');
+}
+
+function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.style.display = 'block';
+    setTimeout(() => { t.style.display = 'none'; }, 3000);
+}
+
+init();
+</script>
+
+</body>
+</html>

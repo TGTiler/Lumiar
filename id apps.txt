@@ -1,0 +1,15 @@
+adguard = 1
+azahar = 2
+duckduckgo = 3
+termux = 4
+openassistant = 5
+cuphead = 6
+hollow knight = 7
+limpaudi = 8
+EM3 = 9
+Mine = 10
+Moonlight = 11
+USLAND = 12
+VSCO = 13
+Kai 9000 = 14
+LocalMathy = 15

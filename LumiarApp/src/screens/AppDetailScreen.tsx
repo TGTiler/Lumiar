@@ -10,6 +10,7 @@ import {
   Alert,
   Linking,
   Dimensions,
+  Modal,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Spacing, BorderRadius } from '../constants/theme';
@@ -66,6 +67,7 @@ export function AppDetailScreen({ route, navigation }: AppDetailScreenProps) {
   const [app, setApp] = useState<AppData | null>(null);
   const [loading, setLoading] = useState(true);
   const [downloading, setDownloading] = useState(false);
+  const [showWarning, setShowWarning] = useState(false);
 
   useEffect(() => {
     loadApp();
@@ -87,24 +89,22 @@ export function AppDetailScreen({ route, navigation }: AppDetailScreenProps) {
       Alert.alert('Erro', 'URL de download não disponível');
       return;
     }
-    Alert.alert('Download', `Deseja baixar ${app.NomeAPP}?`, [
-      { text: 'Cancelar', style: 'cancel' },
-      {
-        text: 'Baixar',
-        onPress: async () => {
-          setDownloading(true);
-          try {
-            const supported = await Linking.canOpenURL(app.url_apk);
-            if (supported) await Linking.openURL(app.url_apk);
-            else Alert.alert('Erro', 'Não foi possível abrir o link');
-          } catch {
-            Alert.alert('Erro', 'Falha ao iniciar download');
-          } finally {
-            setDownloading(false);
-          }
-        },
-      },
-    ]);
+    setShowWarning(true);
+  };
+
+  const confirmDownload = async () => {
+    setShowWarning(false);
+    if (!app?.url_apk) return;
+    setDownloading(true);
+    try {
+      const supported = await Linking.canOpenURL(app.url_apk);
+      if (supported) await Linking.openURL(app.url_apk);
+      else Alert.alert('Erro', 'Não foi possível abrir o link');
+    } catch {
+      Alert.alert('Erro', 'Falha ao iniciar download');
+    } finally {
+      setDownloading(false);
+    }
   };
 
   if (loading) {
@@ -217,6 +217,24 @@ export function AppDetailScreen({ route, navigation }: AppDetailScreenProps) {
           )}
         </TouchableOpacity>
       </View>
+
+      {/* Warning Modal */}
+      <Modal visible={showWarning} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <View style={styles.modalIcon}>
+              <Ionicons name="information-circle" size={40} color={Colors.primary} />
+            </View>
+            <Text style={styles.modalTitle}>Aviso de Instalação</Text>
+            <Text style={styles.modalText}>
+              Se o arquivo baixado contiver números no nome, fique tranquilo. É o identificador seguro da nossa plataforma para este aplicativo.
+            </Text>
+            <TouchableOpacity style={styles.modalBtn} onPress={confirmDownload}>
+              <Text style={styles.modalBtnText}>Entendi, baixar agora</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -261,4 +279,13 @@ const styles = StyleSheet.create({
   bottomBar: { position: 'absolute', bottom: 0, left: 0, right: 0, padding: Spacing.md, paddingBottom: Spacing.xl, backgroundColor: Colors.backgroundLight, borderTopWidth: 1, borderTopColor: Colors.border },
   downloadBarBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: Colors.primary, paddingVertical: Spacing.md, borderRadius: BorderRadius.md, gap: Spacing.sm },
   downloadBarText: { color: Colors.text, fontSize: 16, fontWeight: '700' },
+
+  // Warning Modal
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'center', alignItems: 'center', padding: Spacing.xl },
+  modalCard: { backgroundColor: Colors.backgroundLight, borderRadius: BorderRadius.xl, padding: Spacing.lg, width: '100%', maxWidth: 360, alignItems: 'center', borderWidth: 1, borderColor: Colors.border },
+  modalIcon: { marginBottom: Spacing.md },
+  modalTitle: { color: Colors.text, fontSize: 18, fontWeight: 'bold', marginBottom: Spacing.sm, textAlign: 'center' },
+  modalText: { color: Colors.textSecondary, fontSize: 14, lineHeight: 22, textAlign: 'center', marginBottom: Spacing.lg },
+  modalBtn: { backgroundColor: Colors.primary, borderRadius: BorderRadius.md, paddingVertical: Spacing.md, paddingHorizontal: Spacing.xl, width: '100%', alignItems: 'center' },
+  modalBtnText: { color: Colors.text, fontSize: 16, fontWeight: '700' },
 });
