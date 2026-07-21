@@ -297,8 +297,8 @@ tr:hover td { background: rgba(255,255,255,0.02); }
   outline: none; border-color: var(--accent);
 }
 .form-textarea { resize: vertical; min-height: 80px; }
-.form-select { cursor: pointer; appearance: none; -webkit-appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 36px; }
-.form-select option { background: var(--card); color: var(--text); padding: 8px; }
+.form-select { cursor: pointer; }
+.form-select option { background: var(--card); }
 
 .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 
@@ -658,9 +658,8 @@ tr:hover td { background: rgba(255,255,255,0.02); }
         </div>
       </div>
       <div class="form-group">
-        <label class="label">URL do Logo (512x512)</label>
+        <label class="form-label">URL do Logo</label>
         <input type="text" class="form-input" id="appLogo" placeholder="https://exemplo.com/logo.png">
-        <div class="form-hint">Formato recomendado: 512x512px</div>
       </div>
       <div class="form-row">
         <div class="form-group">
@@ -1266,9 +1265,9 @@ function loadFromStorage() {
     const a = localStorage.getItem('lumiar_apps');
     const c = localStorage.getItem('lumiar_categories');
     const s = localStorage.getItem('lumiar_subcategories');
-    if (a) { const parsed = JSON.parse(a); if (Array.isArray(parsed) && parsed.length) apps = parsed; }
-    if (c) { const parsed = JSON.parse(c); if (Array.isArray(parsed) && parsed.length) categories = parsed; }
-    if (s) { const parsed = JSON.parse(s); if (Array.isArray(parsed) && parsed.length) subcategories = parsed; }
+    if (a) apps = JSON.parse(a);
+    if (c) categories = JSON.parse(c);
+    if (s) subcategories = JSON.parse(s);
   } catch (e) { /* ignore */ }
 }
 
