@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0B0B0F">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Lumiar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/fuse.js@7.0.0"></script>
+<style>
+  :root {
+    --bg: #0B0B0F;
+    --card: #16161E;
+    --card-hover: #1C1C28;
+    --card-border: rgba(157, 78, 221, 0.12);
+    --card-border-active: rgba(157, 78, 221, 0.35);
+    --accent: #9D4EDD;
+    --accent-dark: #7B2CBF;
+    --accent-glow: rgba(157, 78, 221, 0.4);
+    --accent-soft: rgba(157, 78, 221, 0.08);
+    --text: #E8E8ED;
+    --text-secondary: #9CA3AF;
+    --text-muted: #6B7280;
+    --radius: 24px;
+    --radius-lg: 28px;
+    --radius-xl: 32px;
+    --radius-full: 9999px;
+    --dock-height: 72px;
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+    --font: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    height: 100%;
+    user-select: none;
+  }
+
+  body { position: relative; }
+
+  /* ── Scrollbar ── */
+  ::-webkit-scrollbar { width: 0; height: 0; }
+
+  /* ── Splash Screen ── */
+  #splash {
+    position: fixed; inset: 0; z-index: 1000;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    background: var(--bg);
+    transition: opacity 0.6s ease, visibility 0.6s ease;
+  }
+  #splash.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+
+  .splash-bg {
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 50% 30%, rgba(157, 78, 221, 0.15) 0%, transparent 70%),
+      radial-gradient(ellipse 60% 40% at 20% 80%, rgba(138, 43, 226, 0.08) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 50% at 80% 70%, rgba(157, 78, 221, 0.06) 0%, transparent 60%);
+    animation: splashPulse 4s ease-in-out infinite alternate;
+  }
+
+  @keyframes splashPulse {
+    0% { opacity: 0.7; transform: scale(1); }
+    100% { opacity: 1; transform: scale(1.05); }
+  }
+
+  .splash-content {
+    position: relative; z-index: 1;
+    text-align: center; padding: 0 40px;
+    animation: fadeUp 1s ease 0.3s both;
+  }
+
+  .splash-logo {
+    font-size: 48px; font-weight: 800;
+    letter-spacing: -1px;
+    background: linear-gradient(135deg, var(--accent) 0%, #C77DFF 50%, var(--accent) 100%);
+    background-size: 200% 200%;
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: shimmer 3s ease-in-out infinite;
+    margin-bottom: 8px;
+  }
+
+  @keyframes shimmer {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+
+  .splash-tagline {
+    font-size: 22px; font-weight: 600;
+    color: var(--text);
+    line-height: 1.3;
+    margin-top: 24px;
+  }
+
+  .splash-sub {
+    font-size: 14px; color: var(--text-secondary);
+    margin-top: 12px; line-height: 1.5;
+  }
+
+  .splash-btn-wrap {
+    position: absolute; bottom: 60px; left: 0; right: 0;
+    display: flex; justify-content: center; padding: 0 32px;
+    z-index: 1;
+    animation: fadeUp 1s ease 0.8s both;
+  }
+
+  .splash-btn {
+    width: 100%; max-width: 340px; padding: 18px 32px;
+    border: none; border-radius: var(--radius-full);
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
+    color: #fff; font-family: var(--font); font-size: 16px; font-weight: 600;
+    cursor: pointer; letter-spacing: 0.3px;
+    box-shadow: 0 8px 32px var(--accent-glow), 0 2px 8px rgba(0,0,0,0.3);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .splash-btn:active { transform: scale(0.97); }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── App Shell ── */
+  #app {
+    display: none;
+    min-height: 100vh;
+    padding-bottom: calc(var(--dock-height) + var(--safe-bottom) + 20px);
+  }
+  #app.active { display: block; }
+
+  /* ── Header ── */
+  .header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 20px 12px;
+    position: sticky; top: 0; z-index: 50;
+    background: linear-gradient(180deg, var(--bg) 60%, transparent 100%);
+  }
+
+  .header-logo {
+    font-size: 22px; font-weight: 800; letter-spacing: -0.5px;
+    background: linear-gradient(135deg, var(--accent), #C77DFF);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .header-avatar {
+    width: 36px; height: 36px; border-radius: var(--radius-full);
+    background: var(--card); border: 2px solid var(--card-border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+  }
+
+  /* ── Search Bar ── */
+  .search-wrap {
+    padding: 4px 20px 16px;
+  }
+
+  .search-bar {
+    display: flex; align-items: center; gap: 12px;
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-full);
+    padding: 14px 20px;
+    transition: border-color 0.3s, box-shadow 0.3s;
+  }
+  .search-bar:focus-within {
+    border-color: var(--card-border-active);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+  }
+
+  .search-icon {
+    width: 20px; height: 20px; flex-shrink: 0;
+    color: var(--text-muted);
+  }
+
+  .search-input {
+    flex: 1; background: none; border: none; outline: none;
+    color: var(--text); font-family: var(--font); font-size: 15px;
+    font-weight: 400;
+  }
+  .search-input::placeholder { color: var(--text-muted); }
+
+  /* ── Section Labels ── */
+  .section-label {
+    padding: 8px 20px 12px;
+    font-size: 18px; font-weight: 700; letter-spacing: -0.3px;
+  }
+
+  /* ── Featured Card ── */
+  .featured-wrap { padding: 0 20px 24px; }
+
+  .featured-card {
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-xl);
+    padding: 28px 24px;
+    position: relative; overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.2s, border-color 0.3s;
+  }
+  .featured-card:active { transform: scale(0.985); }
+
+  .featured-card::before {
+    content: '';
+    position: absolute; top: -40%; right: -20%;
+    width: 200px; height: 200px;
+    background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
+    opacity: 0.3;
+    pointer-events: none;
+  }
+
+  .featured-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+    color: #fff; font-size: 11px; font-weight: 600;
+    padding: 4px 12px; border-radius: var(--radius-full);
+    margin-bottom: 16px; text-transform: uppercase; letter-spacing: 0.8px;
+  }
+
+  .featured-content { display: flex; align-items: flex-start; gap: 16px; position: relative; z-index: 1; }
+
+  .featured-logo {
+    width: 72px; height: 72px; border-radius: var(--radius);
+    background: rgba(255,255,255,0.06);
+    flex-shrink: 0; object-fit: cover;
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+
+  .featured-info { flex: 1; min-width: 0; }
+
+  .featured-name {
+    font-size: 18px; font-weight: 700;
+    margin-bottom: 4px; white-space: nowrap;
+    overflow: hidden; text-overflow: ellipsis;
+  }
+
+  .featured-desc {
+    font-size: 13px; color: var(--text-secondary);
+    line-height: 1.5; margin-bottom: 14px;
+    display: -webkit-box; -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical; overflow: hidden;
+  }
+
+  .featured-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+    color: #fff; font-size: 13px; font-weight: 600;
+    padding: 10px 20px; border: none; border-radius: var(--radius-full);
+    cursor: pointer;
+    box-shadow: 0 4px 16px var(--accent-glow);
+    transition: transform 0.2s;
+  }
+  .featured-btn:active { transform: scale(0.96); }
+
+  /* ── App List ── */
+  .app-list { padding: 0 20px; }
+
+  .app-card {
+    display: flex; align-items: center; gap: 14px;
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    margin-bottom: 12px;
+    cursor: pointer;
+    transition: transform 0.2s, border-color 0.3s;
+  }
+  .app-card:active { transform: scale(0.98); }
+
+  .app-card-logo {
+    width: 56px; height: 56px; border-radius: 14px;
+    background: rgba(255,255,255,0.06);
+    flex-shrink: 0; object-fit: cover;
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .app-card-info { flex: 1; min-width: 0; }
+
+  .app-card-name {
+    font-size: 15px; font-weight: 600;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    margin-bottom: 2px;
+  }
+
+  .app-card-version {
+    font-size: 12px; color: var(--text-muted);
+    font-family: 'SF Mono', 'Cascadia Code', Consolas, monospace;
+  }
+
+  .app-card-download {
+    flex-shrink: 0;
+    background: var(--accent-soft);
+    border: 1px solid rgba(157, 78, 221, 0.2);
+    color: var(--accent);
+    font-family: var(--font); font-size: 12px; font-weight: 600;
+    padding: 8px 16px; border-radius: var(--radius-full);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .app-card-download:active {
+    background: var(--accent); color: #fff;
+  }
+
+  /* ── Empty / Loading States ── */
+  .loading-state, .empty-state {
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: center; padding: 60px 20px;
+    text-align: center;
+  }
+
+  .loading-spinner {
+    width: 36px; height: 36px;
+    border: 3px solid var(--card-border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin-bottom: 16px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .loading-text { font-size: 14px; color: var(--text-muted); }
+
+  .empty-icon { font-size: 48px; margin-bottom: 12px; opacity: 0.5; }
+  .empty-text { font-size: 14px; color: var(--text-muted); }
+
+  /* ── Modal Overlay ── */
+  .modal-overlay {
+    position: fixed; inset: 0; z-index: 200;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    display: flex; align-items: flex-end; justify-content: center;
+    opacity: 0; visibility: hidden;
+    transition: opacity 0.35s, visibility 0.35s;
+  }
+  .modal-overlay.active { opacity: 1; visibility: visible; }
+
+  .modal-sheet {
+    width: 100%; max-width: 480px;
+    max-height: 88vh;
+    background: var(--card);
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+    border: 1px solid var(--card-border);
+    border-bottom: none;
+    overflow-y: auto;
+    transform: translateY(100%);
+    transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+    position: relative;
+  }
+  .modal-overlay.active .modal-sheet { transform: translateY(0); }
+
+  .modal-handle {
+    width: 36px; height: 4px;
+    background: rgba(255,255,255,0.15);
+    border-radius: var(--radius-full);
+    margin: 12px auto 0;
+  }
+
+  .modal-close {
+    position: absolute; top: 16px; right: 16px;
+    width: 32px; height: 32px;
+    background: rgba(255,255,255,0.08);
+    border: none; border-radius: 50%;
+    color: var(--text-secondary); font-size: 18px;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    z-index: 10;
+    transition: background 0.2s;
+  }
+  .modal-close:active { background: rgba(255,255,255,0.15); }
+
+  .modal-body { padding: 20px 24px 40px; }
+
+  .modal-app-header {
+    display: flex; align-items: center; gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .modal-app-logo {
+    width: 80px; height: 80px; border-radius: var(--radius);
+    background: rgba(255,255,255,0.06);
+    object-fit: cover;
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+
+  .modal-app-name {
+    font-size: 20px; font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  .modal-app-version {
+    font-size: 13px; color: var(--text-muted);
+    font-family: 'SF Mono', 'Cascadia Code', Consolas, monospace;
+  }
+
+  /* ── Carousel ── */
+  .carousel-wrap {
+    margin-bottom: 24px;
+    position: relative;
+  }
+
+  .carousel-track {
+    display: flex; gap: 12px;
+    overflow-x: auto; scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    padding: 4px 0;
+    scrollbar-width: none;
+  }
+  .carousel-track::-webkit-scrollbar { display: none; }
+
+  .carousel-slide {
+    flex: 0 0 calc(100% - 8px);
+    scroll-snap-align: center;
+    border-radius: var(--radius);
+    overflow: hidden;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.06);
+    aspect-ratio: 9 / 16;
+    max-height: 300px;
+  }
+
+  .carousel-slide img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+  }
+
+  .carousel-dots {
+    display: flex; justify-content: center; gap: 8px;
+    margin-top: 12px;
+  }
+
+  .carousel-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: rgba(255,255,255,0.15);
+    transition: background 0.3s, transform 0.3s;
+  }
+  .carousel-dot.active {
+    background: var(--accent);
+    transform: scale(1.2);
+  }
+
+  .modal-download-btn {
+    width: 100%; padding: 18px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+    border: none; border-radius: var(--radius-full);
+    color: #fff; font-family: var(--font); font-size: 16px; font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 8px 32px var(--accent-glow);
+    transition: transform 0.2s;
+  }
+  .modal-download-btn:active { transform: scale(0.97); }
+
+  /* ── Update Modal ── */
+  .update-overlay {
+    position: fixed; inset: 0; z-index: 500;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    display: flex; align-items: center; justify-content: center;
+    padding: 24px;
+    opacity: 0; visibility: hidden;
+    transition: opacity 0.4s, visibility 0.4s;
+  }
+  .update-overlay.active { opacity: 1; visibility: visible; }
+
+  .update-card {
+    width: 100%; max-width: 380px;
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-xl);
+    padding: 40px 32px;
+    text-align: center;
+    transform: scale(0.9);
+    transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .update-overlay.active .update-card { transform: scale(1); }
+
+  .update-icon {
+    font-size: 56px; margin-bottom: 16px;
+  }
+
+  .update-title {
+    font-size: 20px; font-weight: 700;
+    margin-bottom: 8px;
+  }
+
+  .update-text {
+    font-size: 14px; color: var(--text-secondary);
+    line-height: 1.6; margin-bottom: 24px;
+  }
+
+  .update-btn {
+    width: 100%; padding: 16px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+    border: none; border-radius: var(--radius-full);
+    color: #fff; font-family: var(--font); font-size: 15px; font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 8px 32px var(--accent-glow);
+    transition: transform 0.2s;
+  }
+  .update-btn:active { transform: scale(0.97); }
+
+  /* ── Bottom Nav (Dock) ── */
+  .dock {
+    position: fixed;
+    bottom: calc(12px + var(--safe-bottom));
+    left: 50%; transform: translateX(-50%);
+    width: calc(100% - 32px); max-width: 420px;
+    height: var(--dock-height);
+    background: rgba(22, 22, 30, 0.85);
+    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: var(--radius-xl);
+    display: flex; align-items: center; justify-content: space-around;
+    padding: 0 12px;
+    z-index: 100;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.03);
+  }
+
+  .dock-item {
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    padding: 8px 16px; border-radius: var(--radius);
+    cursor: pointer; position: relative;
+    transition: background 0.2s;
+  }
+  .dock-item:active { background: rgba(255,255,255,0.05); }
+
+  .dock-item.active .dock-icon { color: var(--accent); }
+  .dock-item.active .dock-label { color: var(--accent); }
+
+  .dock-item.active::after {
+    content: '';
+    position: absolute; top: 2px;
+    width: 4px; height: 4px; border-radius: 50%;
+    background: var(--accent);
+  }
+
+  .dock-icon {
+    width: 24px; height: 24px;
+    color: var(--text-muted);
+    transition: color 0.2s;
+  }
+
+  .dock-label {
+    font-size: 10px; font-weight: 500;
+    color: var(--text-muted);
+    transition: color 0.2s;
+  }
+
+  /* ── Pages (Favorites, Library, Profile) ── */
+  .page { display: none; }
+  .page.active { display: block; }
+
+  .page-placeholder {
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 80px 20px; text-align: center;
+  }
+  .page-placeholder-icon { font-size: 56px; margin-bottom: 16px; opacity: 0.4; }
+  .page-placeholder-text { font-size: 15px; color: var(--text-muted); }
+
+  /* ── Utilities ── */
+  .visually-hidden {
+    position: absolute; width: 1px; height: 1px;
+    padding: 0; margin: -1px; overflow: hidden;
+    clip: rect(0,0,0,0); border: 0;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════ SPLASH SCREEN ═══════ -->
+<div id="splash">
+  <div class="splash-bg"></div>
+  <div class="splash-content">
+    <div class="splash-logo">Lumiar</div>
+    <div class="splash-tagline">Encontre os melhores ports de comunidade</div>
+    <div class="splash-sub">Apps alternativos, mods e ports feitos pela comunidade.</div>
+  </div>
+  <div class="splash-btn-wrap">
+    <button class="splash-btn" id="splashBtn">Continuar</button>
+  </div>
+</div>
+
+<!-- ═══════ APP SHELL ═══════ -->
+<div id="app">
+
+  <!-- ── HOME PAGE ── -->
+  <div class="page active" id="page-home">
+    <header class="header">
+      <div class="header-logo">Lumiar</div>
+      <div class="header-avatar">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      </div>
+    </header>
+
+    <div class="search-wrap">
+      <div class="search-bar">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" class="search-input" id="searchInput" placeholder="Pesquisar apps..." autocomplete="off">
+      </div>
+    </div>
+
+    <div id="featuredSection" class="featured-wrap" style="display:none;"></div>
+
+    <div class="section-label" id="listLabel">Todos os Apps</div>
+
+    <div id="appList" class="app-list">
+      <div class="loading-state">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Carregando apps...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── FAVORITES PAGE ── -->
+  <div class="page" id="page-favorites">
+    <header class="header">
+      <div class="header-logo">Favoritos</div>
+    </header>
+    <div class="page-placeholder">
+      <div class="page-placeholder-icon">&#9829;</div>
+      <div class="page-placeholder-text">Seus apps favoritos aparecerão aqui.</div>
+    </div>
+  </div>
+
+  <!-- ── LIBRARY PAGE ── -->
+  <div class="page" id="page-library">
+    <header class="header">
+      <div class="header-logo">Biblioteca</div>
+    </header>
+    <div class="page-placeholder">
+      <div class="page-placeholder-icon">&#9776;</div>
+      <div class="page-placeholder-text">Apps baixados serão listados aqui.</div>
+    </div>
+  </div>
+
+  <!-- ── PROFILE PAGE ── -->
+  <div class="page" id="page-profile">
+    <header class="header">
+      <div class="header-logo">Perfil</div>
+    </header>
+    <div class="page-placeholder">
+      <div class="page-placeholder-icon">&#9881;</div>
+      <div class="page-placeholder-text">Configurações e perfil em breve.</div>
+    </div>
+  </div>
+
+  <!-- ── DOCK ── -->
+  <nav class="dock" role="navigation" aria-label="Navegação principal">
+    <div class="dock-item active" data-page="home">
+      <svg class="dock-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span class="dock-label">Home</span>
+    </div>
+    <div class="dock-item" data-page="favorites">
+      <svg class="dock-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+      <span class="dock-label">Favoritos</span>
+    </div>
+    <div class="dock-item" data-page="library">
+      <svg class="dock-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+      <span class="dock-label">Biblioteca</span>
+    </div>
+    <div class="dock-item" data-page="profile">
+      <svg class="dock-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span class="dock-label">Perfil</span>
+    </div>
+  </nav>
+
+</div>
+
+<!-- ═══════ APP DETAIL MODAL ═══════ -->
+<div class="modal-overlay" id="detailModal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <button class="modal-close" id="detailClose" aria-label="Fechar">&times;</button>
+    <div class="modal-body">
+      <div class="modal-app-header">
+        <img class="modal-app-logo" id="modalLogo" src="" alt="">
+        <div>
+          <div class="modal-app-name" id="modalName"></div>
+          <div class="modal-app-version" id="modalVersion"></div>
+        </div>
+      </div>
+      <div class="carousel-wrap">
+        <div class="carousel-track" id="carouselTrack"></div>
+        <div class="carousel-dots" id="carouselDots"></div>
+      </div>
+      <button class="modal-download-btn" id="modalDownloadBtn">
+        <svg style="width:18px;height:18px;vertical-align:middle;margin-right:6px;margin-top:-2px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Baixar APK
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ UPDATE MODAL ═══════ -->
+<div class="update-overlay" id="updateModal">
+  <div class="update-card">
+    <div class="update-icon">&#128640;</div>
+    <div class="update-title">Atualização Disponível</div>
+    <div class="update-text" id="updateText">
+      Uma nova versão do Lumiar está disponível. Atualize para continuar usando.
+    </div>
+    <button class="update-btn" id="updateBtn">Atualizar Agora</button>
+  </div>
+</div>
+
+<script>
+/* ══════════════════════════════════════════
+   CONFIGURATION
+   ══════════════════════════════════════════ */
+
+const CURRENT_APP_VERSION = '1.0.0';
+const VERSION_JSON_URL = 'https://raw.githubusercontent.com/PichauInfor/Lumiar/main/JSON/Version.json';
+const APPS_JSON_URL = 'https://raw.githubusercontent.com/PichauInfor/Lumiar/main/JSON/apps.json';
+
+/* ══════════════════════════════════════════
+   STATE
+   ══════════════════════════════════════════ */
+
+let allApps = [];
+let fuseInstance = null;
+let currentModalApp = null;
+
+/* ══════════════════════════════════════════
+   SPLASH
+   ══════════════════════════════════════════ */
+
+document.getElementById('splashBtn').addEventListener('click', () => {
+  document.getElementById('splash').classList.add('hidden');
+  document.getElementById('app').classList.add('active');
+});
+
+/* ══════════════════════════════════════════
+   NAVIGATION
+   ══════════════════════════════════════════ */
+
+document.querySelectorAll('.dock-item').forEach(item => {
+  item.addEventListener('click', () => {
+    document.querySelectorAll('.dock-item').forEach(d => d.classList.remove('active'));
+    item.classList.add('active');
+    const page = item.dataset.page;
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('page-' + page).classList.add('active');
+  });
+});
+
+/* ══════════════════════════════════════════
+   FETCH & RENDER APPS
+   ══════════════════════════════════════════ */
+
+async function loadApps() {
+  const listEl = document.getElementById('appList');
+  try {
+    const resp = await fetch(APPS_JSON_URL);
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    const data = await resp.json();
+    allApps = Array.isArray(data) ? data : [];
+
+    fuseInstance = new Fuse(allApps, {
+      keys: ['NomeAPP', 'ID'],
+      threshold: 0.35,
+      ignoreLocation: true,
+      minMatchCharLength: 1
+    });
+
+    renderApps(allApps);
+  } catch (err) {
+    console.error('Failed to load apps:', err);
+    listEl.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">&#9888;</div>
+        <div class="empty-text">Não foi possível carregar os apps.<br>Verifique sua conexão e tente novamente.</div>
+      </div>`;
+  }
+}
+
+function renderApps(apps) {
+  const listEl = document.getElementById('appList');
+  const featuredEl = document.getElementById('featuredSection');
+  const labelEl = document.getElementById('listLabel');
+
+  if (!apps.length) {
+    listEl.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">&#128269;</div>
+        <div class="empty-text">Nenhum app encontrado.</div>
+      </div>`;
+    featuredEl.style.display = 'none';
+    labelEl.textContent = '';
+    return;
+  }
+
+  /* Featured = first app */
+  const featured = apps[0];
+  featuredEl.style.display = 'block';
+  featuredEl.innerHTML = `
+    <div class="featured-card" data-app-idx="0">
+      <div class="featured-badge">Mais Popular</div>
+      <div class="featured-content">
+        <img class="featured-logo" src="${escHtml(featured.logo || '')}" alt="${escHtml(featured.NomeAPP || '')}" onerror="this.style.display='none'">
+        <div class="featured-info">
+          <div class="featured-name">${escHtml(featured.NomeAPP || 'App')}</div>
+          <div class="featured-desc">${escHtml(featured.ID || '')}</div>
+          <button class="featured-btn" data-download="${escAttr(featured.url_apk || '')}">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Baixar
+          </button>
+        </div>
+      </div>
+    </div>`;
+
+  featuredEl.querySelector('.featured-card').addEventListener('click', (e) => {
+    if (e.target.closest('.featured-btn')) {
+      e.stopPropagation();
+      triggerDownload(featured.url_apk);
+      return;
+    }
+    openDetailModal(featured);
+  });
+
+  /* List */
+  labelEl.textContent = apps.length > 1 ? 'Todos os Apps' : '';
+  let html = '';
+  apps.forEach((app, idx) => {
+    html += `
+      <div class="app-card" data-app-idx="${idx}">
+        <img class="app-card-logo" src="${escHtml(app.logo || '')}" alt="${escHtml(app.NomeAPP || '')}" onerror="this.style.background='rgba(157,78,221,0.12)'">
+        <div class="app-card-info">
+          <div class="app-card-name">${escHtml(app.NomeAPP || 'App')}</div>
+          <div class="app-card-version">v${escHtml(app.Versao || '1.0.0')}</div>
+        </div>
+        <button class="app-card-download" data-download="${escAttr(app.url_apk || '')}">Baixar</button>
+      </div>`;
+  });
+  listEl.innerHTML = html;
+
+  listEl.querySelectorAll('.app-card').forEach(card => {
+    card.addEventListener('click', (e) => {
+      if (e.target.closest('.app-card-download')) {
+        e.stopPropagation();
+        const idx = parseInt(card.dataset.appIdx);
+        triggerDownload(allApps[idx].url_apk);
+        return;
+      }
+      const idx = parseInt(card.dataset.appIdx);
+      openDetailModal(allApps[idx]);
+    });
+  });
+}
+
+/* ══════════════════════════════════════════
+   SEARCH (Fuse.js)
+   ══════════════════════════════════════════ */
+
+document.getElementById('searchInput').addEventListener('input', (e) => {
+  const q = e.target.value.trim();
+  if (!q) {
+    renderApps(allApps);
+    return;
+  }
+  const results = fuseInstance.search(q);
+  renderApps(results.map(r => r.item));
+});
+
+/* ══════════════════════════════════════════
+   DETAIL MODAL
+   ══════════════════════════════════════════ */
+
+function openDetailModal(app) {
+  currentModalApp = app;
+  const modal = document.getElementById('detailModal');
+  document.getElementById('modalLogo').src = app.logo || '';
+  document.getElementById('modalName').textContent = app.NomeAPP || '';
+  document.getElementById('modalVersion').textContent = 'v' + (app.Versao || '1.0.0');
+
+  /* Carousel */
+  const track = document.getElementById('carouselTrack');
+  const dots = document.getElementById('carouselDots');
+  const imgs = [app.img1, app.img2].filter(Boolean);
+  track.innerHTML = '';
+  dots.innerHTML = '';
+
+  if (imgs.length) {
+    imgs.forEach((src, i) => {
+      track.innerHTML += `
+        <div class="carousel-slide">
+          <img src="${escHtml(src)}" alt="Screenshot ${i + 1}" onerror="this.parentElement.innerHTML='<div style=&quot;display:flex;align-items:center;justify-content:center;height:100%;color:var(--text-muted);font-size:13px;&quot;>Imagem indisponível</div>'">
+        </div>`;
+      dots.innerHTML += `<div class="carousel-dot${i === 0 ? ' active' : ''}"></div>`;
+    });
+  } else {
+    track.innerHTML = `
+      <div class="carousel-slide">
+        <div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--text-muted);font-size:13px;">Sem capturas de tela</div>
+      </div>`;
+  }
+
+  /* Carousel scroll → dots */
+  track.addEventListener('scroll', () => {
+    const scrollLeft = track.scrollLeft;
+    const slideWidth = track.firstChild ? track.firstChild.offsetWidth + 12 : 1;
+    const activeIdx = Math.round(scrollLeft / slideWidth);
+    dots.querySelectorAll('.carousel-dot').forEach((d, i) => {
+      d.classList.toggle('active', i === activeIdx);
+    });
+  });
+
+  /* Download button */
+  document.getElementById('modalDownloadBtn').onclick = () => triggerDownload(app.url_apk);
+
+  modal.classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeDetailModal() {
+  document.getElementById('detailModal').classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+document.getElementById('detailClose').addEventListener('click', closeDetailModal);
+document.getElementById('detailModal').addEventListener('click', (e) => {
+  if (e.target === e.currentTarget) closeDetailModal();
+});
+
+/* ══════════════════════════════════════════
+   VERSION CHECK
+   ══════════════════════════════════════════ */
+
+async function checkVersion() {
+  try {
+    const resp = await fetch(VERSION_JSON_URL + '?t=' + Date.now());
+    if (!resp.ok) return;
+    const data = await resp.json();
+    const remoteVersion = data.Versao;
+    if (!remoteVersion) return;
+
+    if (compareVersions(remoteVersion, CURRENT_APP_VERSION) > 0) {
+      const downloadUrl = data.Download || '#';
+      document.getElementById('updateText').textContent =
+        `Versão ${remoteVersion} disponível (atual: ${CURRENT_APP_VERSION}). Atualize para continuar usando.`;
+      document.getElementById('updateBtn').onclick = () => triggerDownload(downloadUrl);
+      document.getElementById('updateModal').classList.add('active');
+    }
+  } catch (err) {
+    console.warn('Version check failed:', err);
+  }
+}
+
+function compareVersions(a, b) {
+  const pa = a.split('.').map(Number);
+  const pb = b.split('.').map(Number);
+  for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
+    const na = pa[i] || 0;
+    const nb = pb[i] || 0;
+    if (na > nb) return 1;
+    if (na < nb) return -1;
+  }
+  return 0;
+}
+
+/* ══════════════════════════════════════════
+   DOWNLOAD
+   ══════════════════════════════════════════ */
+
+function triggerDownload(url) {
+  if (!url) return;
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = '';
+  a.rel = 'noopener';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+
+/* ══════════════════════════════════════════
+   HELPERS
+   ══════════════════════════════════════════ */
+
+function escHtml(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+function escAttr(s) {
+  return s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+/* ══════════════════════════════════════════
+   INIT
+   ══════════════════════════════════════════ */
+
+checkVersion();
+loadApps();
+</script>
+</body>
+</html>

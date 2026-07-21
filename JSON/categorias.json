@@ -1,0 +1,394 @@
+{
+  "categories": [
+    {
+      "nome": "Jogos",
+      "slug": "jogos",
+      "icon": "🎮",
+      "color": "#FF6B6B"
+    },
+    {
+      "nome": "Social",
+      "slug": "social",
+      "icon": "💬",
+      "color": "#4ECDC4"
+    },
+    {
+      "nome": "Utilidades",
+      "slug": "utilidades",
+      "icon": "🔧",
+      "color": "#45B7D1"
+    },
+    {
+      "nome": "Mídia",
+      "slug": "midia",
+      "icon": "🎬",
+      "color": "#96CEB4"
+    },
+    {
+      "nome": "Produtividade",
+      "slug": "produtividade",
+      "icon": "📋",
+      "color": "#FFEAA7"
+    },
+    {
+      "nome": "Personalização",
+      "slug": "personalizacao",
+      "icon": "🎨",
+      "color": "#DDA0DD"
+    },
+    {
+      "nome": "Inteligência Artificial",
+      "slug": "IA",
+      "icon": "🤖",
+      "color": "#4fdea0"
+    },
+    {
+      "nome": "Ports de PC & Consoles",
+      "slug": "ports",
+      "icon": "🎮",
+      "color": "#fb0404"
+    },
+    {
+      "nome": "Emuladores & Cores",
+      "slug": "emuladores",
+      "icon": "🕹️",
+      "color": "#4fb3de"
+    },
+    {
+      "nome": "Patches & Mod-Menus",
+      "slug": "patches-e-mods",
+      "icon": "⚽",
+      "color": "#18f259"
+    },
+    {
+      "nome": "Ferramentas de Devs",
+      "slug": "ferramentas-dev",
+      "icon": "🛠️",
+      "color": "#9d4edd"
+    },
+    {
+      "nome": "Otimização & Performance",
+      "slug": "otimizacao",
+      "icon": "⚡",
+      "color": "#d4de4f"
+    },
+    {
+      "nome": "Navegadores & Redes",
+      "slug": "navegacao",
+      "icon": "🌐",
+      "color": "#4f94de"
+    }
+  ],
+  "subcategories": [
+    {
+      "nome": "Ports de Comunidade",
+      "slug": "ports-comunidade",
+      "parent": "Jogos"
+    },
+    {
+      "nome": "Futebol & Esportes",
+      "slug": "esportes",
+      "parent": "Jogos"
+    },
+    {
+      "nome": "Ação & Aventura",
+      "slug": "acao-aventura",
+      "parent": "Jogos"
+    },
+    {
+      "nome": "RPG & Estratégia",
+      "slug": "rpg-estrategia",
+      "parent": "Jogos"
+    },
+    {
+      "nome": "Tiro & FPS",
+      "slug": "tiro-fps",
+      "parent": "Jogos"
+    },
+    {
+      "nome": "Sandbox & Construção",
+      "slug": "sandbox",
+      "parent": "Jogos"
+    },
+    {
+      "nome": "Casual & Puzzle",
+      "slug": "casual-puzzle",
+      "parent": "Jogos"
+    },
+    {
+      "nome": "Terror & Sobrevivência",
+      "slug": "terror-survival",
+      "parent": "Jogos"
+    },
+    {
+      "nome": "Gerenciadores de Arquivos",
+      "slug": "gerenciadores-arquivos",
+      "parent": "Utilidades"
+    },
+    {
+      "nome": "Instaladores & Extração",
+      "slug": "instaladores-extracao",
+      "parent": "Utilidades"
+    },
+    {
+      "nome": "Desempenho & Bateria",
+      "slug": "desempenho-bateria",
+      "parent": "Utilidades"
+    },
+    {
+      "nome": "Segurança & Rede",
+      "slug": "seguranca-rede",
+      "parent": "Utilidades"
+    },
+    {
+      "nome": "Customização de Sistema",
+      "slug": "customizacao-sistema",
+      "parent": "Utilidades"
+    },
+    {
+      "nome": "Ferramentas de Root & System",
+      "slug": "root-sistema",
+      "parent": "Utilidades"
+    },
+    {
+      "nome": "Mensageiros & Chat",
+      "slug": "mensageiros",
+      "parent": "Social"
+    },
+    {
+      "nome": "Redes Alternativas",
+      "slug": "redes-alternativas",
+      "parent": "Social"
+    },
+    {
+      "nome": "Fóruns & Comunidades",
+      "slug": "foruns-comunidades",
+      "parent": "Social"
+    },
+    {
+      "nome": "Voz & Vídeo",
+      "slug": "voz-video",
+      "parent": "Social"
+    },
+    {
+      "nome": "Players de Vídeo",
+      "slug": "players-video",
+      "parent": "Mídia"
+    },
+    {
+      "nome": "Música & Áudio",
+      "slug": "musica-audio",
+      "parent": "Mídia"
+    },
+    {
+      "nome": "Streaming & TV",
+      "slug": "streaming-tv",
+      "parent": "Mídia"
+    },
+    {
+      "nome": "Galeria & Imagens",
+      "slug": "galeria-imagens",
+      "parent": "Mídia"
+    },
+    {
+      "nome": "Edição & Gravação",
+      "slug": "edicao-gravacao",
+      "parent": "Mídia"
+    },
+    {
+      "nome": "Notas & Documentos",
+      "slug": "notas-documentos",
+      "parent": "Produtividade"
+    },
+    {
+      "nome": "Tarefas & Organização",
+      "slug": "tarefas-organizacao",
+      "parent": "Produtividade"
+    },
+    {
+      "nome": "Foco & Gestão de Tempo",
+      "slug": "foco-tempo",
+      "parent": "Produtividade"
+    },
+    {
+      "nome": "Escritório & Planilhas",
+      "slug": "escritorio-planilhas",
+      "parent": "Produtividade"
+    },
+    {
+      "nome": "Mapas Mentais & Estudos",
+      "slug": "estudos-mindmaps",
+      "parent": "Produtividade"
+    },
+    {
+      "nome": "Wallpapers & Fundo",
+      "slug": "wallpapers-fundo",
+      "parent": "Personalização"
+    },
+    {
+      "nome": "Launchers & Início",
+      "slug": "launchers-inicio",
+      "parent": "Personalização"
+    },
+    {
+      "nome": "Pacotes de Ícones",
+      "slug": "pacotes-icones",
+      "parent": "Personalização"
+    },
+    {
+      "nome": "Widgets & Telas de Bloqueio",
+      "slug": "widgets-lockscreen",
+      "parent": "Personalização"
+    },
+    {
+      "nome": "Temas & Fontes",
+      "slug": "temas-fontes",
+      "parent": "Personalização"
+    },
+    {
+      "nome": "Assistentes & Chatbots",
+      "slug": "chatbots-assistentes",
+      "parent": "Inteligência Artificial"
+    },
+    {
+      "nome": "Geração de Imagens & Arte",
+      "slug": "geracao-imagens",
+      "parent": "Inteligência Artificial"
+    },
+    {
+      "nome": "Escrita & Produtividade IA",
+      "slug": "escrita-produtividade",
+      "parent": "Inteligência Artificial"
+    },
+    {
+      "nome": "Programação & Código",
+      "slug": "programacao-codigo",
+      "parent": "Inteligência Artificial"
+    },
+    {
+      "nome": "Áudio, Voz & Mídia",
+      "slug": "audio-voz-midia",
+      "parent": "Inteligência Artificial"
+    },
+    {
+      "nome": "IAs Locais & Modelos",
+      "slug": "ias-locais",
+      "parent": "Inteligência Artificial"
+    },
+    {
+      "nome": "Ports de PC",
+      "slug": "ports-pc",
+      "parent": "Ports de PC & Consoles"
+    },
+    {
+      "nome": "Ports de Consoles",
+      "slug": "ports-consoles",
+      "parent": "Ports de PC & Consoles"
+    },
+    {
+      "nome": "Engines & Source Ports",
+      "slug": "source-ports",
+      "parent": "Ports de PC & Consoles"
+    },
+    {
+      "nome": "Indies & Remakes da Comunidade",
+      "slug": "indies-remakes",
+      "parent": "Ports de PC & Consoles"
+    },
+    {
+      "nome": "Múltiplas Plataformas & Outros",
+      "slug": "outros-ports",
+      "parent": "Ports de PC & Consoles"
+    },
+    {
+      "nome": "Retro & 8/16-Bits",
+      "slug": "retro-8-16bits",
+      "parent": "Emuladores & Cores"
+    },
+    {
+      "nome": "3D & Consoles Clássicos",
+      "slug": "consoles-3d",
+      "parent": "Emuladores & Cores"
+    },
+    {
+      "nome": "Consoles Avançados & Laptops",
+      "slug": "consoles-avancados",
+      "parent": "Emuladores & Cores"
+    },
+    {
+      "nome": "Modernos & PC Emulation",
+      "slug": "modernos-pc",
+      "parent": "Emuladores & Cores"
+    },
+    {
+      "nome": "Frontends & Cores",
+      "slug": "frontends-cores",
+      "parent": "Emuladores & Cores"
+    },
+    {
+      "nome": "Patches de Futebol & Esportes",
+      "slug": "patches-futebol",
+      "parent": "Patches & Mod-Menus"
+    },
+    {
+      "nome": "Mod-Menus & Cheats",
+      "slug": "mod-menus",
+      "parent": "Patches & Mod-Menus"
+    },
+    {
+      "nome": "Textures, Shaders & Visuals",
+      "slug": "texturas-visuais",
+      "parent": "Patches & Mod-Menus"
+    },
+    {
+      "nome": "Traduções & Legendas",
+      "slug": "traducoes-legendas",
+      "parent": "Patches & Mod-Menus"
+    },
+    {
+      "nome": "IDEs & Editores de Código",
+      "slug": "ides-editores",
+      "parent": "Ferramentas de Devs"
+    },
+    {
+      "nome": "Inspecção & Engenharia Reversa",
+      "slug": "inspecao-reversa",
+      "parent": "Ferramentas de Devs"
+    },
+    {
+      "nome": "Terminais & Ambientes Linux",
+      "slug": "terminais-linux",
+      "parent": "Ferramentas de Devs"
+    },
+    {
+      "nome": "Assets & Motores de Jogos",
+      "slug": "assets-engines",
+      "parent": "Ferramentas de Devs"
+    },
+    {
+      "nome": "Game Boosters & GFX",
+      "slug": "game-boosters-gfx",
+      "parent": "Otimização & Performance"
+    },
+    {
+      "nome": "Kernel & Hardware",
+      "slug": "kernel-hardware",
+      "parent": "Otimização & Performance"
+    },
+    {
+      "nome": "Monitores de Sistema & FPS",
+      "slug": "monitores-sistema",
+      "parent": "Otimização & Performance"
+    },
+    {
+      "nome": "Limpeza & Armazenamento",
+      "slug": "limpeza-armazenamento",
+      "parent": "Otimização & Performance"
+    },
+    {
+      "nome": "Bateria & Autonomia",
+      "slug": "bateria-autonomia",
+      "parent": "Otimização & Performance"
+    }
+  ]
+}
