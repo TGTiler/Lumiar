@@ -6,8 +6,10 @@ APKS/
 node_modules/
 package-lock.json
 
-# MiMoCode (ferramentas de desenvolvimento)
-.mimocode/
+# Expo build
+.expo/
+android/
+ios/
 
 # Environment variables
 .env
@@ -24,6 +26,7 @@ Desktop.ini
 .idea/
 *.swp
 *.swo
+.claude/
 
 # Logs
 *.log
@@ -38,3 +41,9 @@ build/
 tmp/
 temp/
 *.tmp
+
+# MiMoCode / Dev tools
+.mimocode/
+AGENTS.md
+opencode.json
+Skills/

@@ -1,6 +1,6 @@
-# Lumiar — Loja Alternativa de Apps
+# Lumiar Store
 
-Loja de aplicativos alternativos, mods e ports da comunidade.
+Loja alternativa de apps, mods e ports da comunidade Android. App nativo desenvolvido com Expo/React Native.
 
 ---
 
@@ -8,20 +8,44 @@ Loja de aplicativos alternativos, mods e ports da comunidade.
 
 ```
 Lumiar/
-├── APP/
-│   └── index.html              # Web App principal (HTML + CSS + JS)
+├── LumiarApp/                  # App nativo Android (Expo/React Native)
+│   ├── App.tsx                 # Entry point com navegação
+│   ├── src/
+│   │   ├── components/         # Componentes reutilizáveis
+│   │   │   ├── AppCard.tsx     # Cards de apps (destaque + lista)
+│   │   │   ├── BottomNav.tsx   # Barra de navegação inferior
+│   │   │   └── ProfileModal.tsx # Modal de perfil do usuário
+│   │   ├── screens/            # Tela do aplicativo
+│   │   │   ├── HomeScreen.tsx  # Tela principal com categorias
+│   │   │   ├── AppDetailScreen.tsx # Detalhes do app
+│   │   │   └── SettingsScreen.tsx  # Configurações
+│   │   ├── services/
+│   │   │   └── api.ts          # Consumo da API GitHub (JSON)
+│   │   └── constants/
+│   │       └── theme.ts        # Cores, fontes, espaçamentos
+│   └── app.json                # Configuração Expo
 ├── JSON/
-│   ├── Version.json            # Controle de versão da Lumiar
-│   └── apps.json               # Lista de apps disponíveis
-├── .mimocode/
-│   ├── skills/                 # Skills de desenvolvimento
-│   ├── agents/                 # Personas de especialista
-│   ├── rules/                  # Regras de código
-│   └── knowledge/              # Base de conhecimento
-├── AGENTS.md                   # Configuração do agente
-├── opencode.json               # Configuração do OpenCode
-└── README.md                   # Este arquivo
+│   ├── apps.json               # Lista de apps disponíveis
+│   ├── categorias.json         # Categorias e subcategorias
+│   └── Version.json            # Versão atual da loja
+├── APK/
+│   └── Lumiar-v1.0.5.apk      # Último release compilado
+└── README.md
 ```
+
+---
+
+## Funcionalidades
+
+- **Design Moderno** - Interface estilo Google Play Store / App Store
+- **Navegação por Abas** - Bottom Nav com Início e Configurações
+- **Perfil Local** - Avatar e nome salvos via AsyncStorage
+- **Categorias em Chips** - Barra horizontal com scroll e filtragem
+- **Destaques Automáticos** - Últimos 5 apps + flag `"Destaque": true`
+- **Busca em Tempo Real** - Filtragem por nome, descrição e categoria
+- **Fallback de Imagens** - Gradiente roxo com inicial quando URL falha
+- **Sync com GitHub** - Atualização automática dos dados via JSON remoto
+- **Download de APKs** - Abertura direta do link de download
 
 ---
 
@@ -33,20 +57,24 @@ Cada app é um objeto com estas propriedades:
 
 | Campo | Tipo | Descrição |
 |-------|------|-----------|
-| `ID` | string | Identificador único do app (usado na pesquisa) |
+| `ID` | string | Identificador único |
 | `NomeAPP` | string | Nome exibido na loja |
 | `Versao` | string | Versão atual do APK |
-| `logo` | string | URL da imagem do logo (120x120 recomendado) |
-| `img1` | string | URL da primeira screenshot (400x700 recomendado) |
-| `img2` | string | URL da segunda screenshot |
-| `url_apk` | string | URL direta para download do APK |
-| `descricao` | string | Descrição do app |
+| `Descricao` | string | Descrição curta do app |
+| `logo` | string | URL da logo (ImgBB ou outro host) |
+| `img1` | string | URL da screenshot 1 |
+| `img2` | string | URL da screenshot 2 |
+| `url_apk` | string | URL direta para download |
+| `categoria` | string | Nome da categoria |
+| `CategoriaSlug` | string | Slug da categoria |
+| `SubcategoriaSlug` | string | Slug da subcategoria |
+| `Destaque` | boolean | Opcional: incluir nos destaques |
 
 ### JSON de Versão (`JSON/Version.json`)
 
 | Campo | Tipo | Descrição |
 |-------|------|-----------|
-| `Versao` | string | Versão atual da loja (formato semver: X.Y.Z) |
+| `Versao` | string | Versão da loja (formato semver) |
 | `Download` | string | URL de download da atualização |
 | `Changelog` | string | Descrição das mudanças |
 
@@ -54,66 +82,68 @@ Cada app é um objeto com estas propriedades:
 
 ## Como Adicionar um App
 
-1. Abra `JSON/apps.json`
-2. Adicione um novo objeto no array:
+1. Faça upload do APK para um host (GitHub Releases, etc.)
+2. Faça upload das imagens (logo, screenshots) para ImgBB ou similar
+3. Adicione o objeto no `JSON/apps.json`:
 
 ```json
 {
-  "ID": "meu-app",
+  "ID": "com.meuapp",
   "NomeAPP": "Meu App",
-  "Versao": "1.0.0",
-  "logo": "https://exemplo.com/logo.png",
-  "img1": "https://exemplo.com/screenshot1.png",
-  "img2": "https://exemplo.com/screenshot2.png",
-  "url_apk": "https://exemplo.com/app.apk",
-  "descricao": "Descrição do app."
+  "Versao": "v1.0.0",
+  "Descricao": "Descrição curta do app.",
+  "CategoriaSlug": "utilidades",
+  "SubcategoriaSlug": "",
+  "logo": "https://i.ibb.co/exemplo/logo.png",
+  "img1": "https://i.ibb.co/exemplo/screen1.png",
+  "img2": "https://i.ibb.co/exemplo/screen2.png",
+  "url_apk": "https://exemplo.com/meuapp.apk",
+  "categoria": "Utilidades",
+  "subcategoria": ""
 }
 ```
 
-3. Faça push para o GitHub
-4. O web app carrega automaticamente
+4. Faça push para o GitHub
+5. O app atualiza automaticamente no próximo sync
 
 ---
 
-## URLs de Exemplo (GitHub Raw)
+## Hospedagem dos Dados
 
-Para apps hospedados no GitHub:
+Os dados da loja (apps, categorias, versão) ficam hospedados no GitHub:
 
 ```
-https://raw.githubusercontent.com/{usuario}/{repo}/main/JSON/apps.json
-https://raw.githubusercontent.com/{usuario}/{repo}/main/JSON/Version.json
+https://raw.githubusercontent.com/TGTiler/Lumiar/main/JSON/apps.json
+https://raw.githubusercontent.com/TGTiler/Lumiar/main/JSON/categorias.json
+https://raw.githubusercontent.com/TGTiler/Lumiar/main/JSON/Version.json
 ```
 
 ---
 
-## Hospedagem
+## Tecnologias
 
-### Opção 1: GitHub Pages
-1. Ative GitHub Pages no repo
-2. Acesse: `https://{usuario}.github.io/{repo}/APP/`
-
-### Opção 2: Servidor Local
-1. Instale um servidor local (ex: Live Server no VS Code)
-2. Abra a pasta `APP/`
-
-### Opção 3: Qualquer Hosting Estático
-- Netlify, Vercel, Cloudflare Pages, etc.
-- Pasta de build: `APP/`
+- **Expo SDK 57** - Framework React Native
+- **React Native 0.86** - UI nativa
+- **AsyncStorage** - Dados locais (perfil)
+- **Ionicons** - Ícones
+- **GitHub API** - Hospedagem de dados JSON
 
 ---
 
-## Desenvolvimento
+## Build do APK
 
-### Tecnologias
-- HTML5, CSS3, JavaScript (ES2024+)
-- Fuse.js (busca fuzzy via CDN)
-- Google Fonts (Inter)
+```bash
+cd LumiarApp
+npm install
+npx expo prebuild --platform android
+cd android
+./gradlew assembleRelease
+```
 
-### Funcionalidades
-- Splash Screen animada
-- Busca em tempo real com tolerância a erros
-- Verificação automática de atualizações
-- Download direto de APKs
-- Navegação por dock flutuante
-- Design responsivo mobile-first
-- Glassmorphism e animações suaves
+O APK gerado fica em `android/app/build/outputs/apk/release/`.
+
+---
+
+## Licença
+
+MIT - TGTiler © 2026
