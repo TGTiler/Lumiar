@@ -1,5 +1,5 @@
 {
-  "Versao": "1.0.0",
-  "Download": "https://github.com/PichauInfor/Lumiar/releases/latest/download/Lumiar.apk",
-  "Changelog": "Versão inicial do Lumiar - Loja de Apps"
+  "Versao": "1.0.5",
+  "Download": "https://github.com/TGTiler/Lumiar/releases/latest/download/Lumiar-v1.0.5.apk",
+  "Changelog": "Interface moderna estilo Play Store, chips de categorias, destaques automáticos, tratamento de imagens com fallback"
 }

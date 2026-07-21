@@ -1,0 +1,32 @@
+{
+  "expo": {
+    "name": "Lumiar Store",
+    "slug": "lumiar-store",
+    "version": "1.0.5",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.tgtiler.lumiar"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#9D4EDD",
+        "foregroundImage": "./assets/icon.png"
+      },
+      "package": "com.tgtiler.lumiar",
+      "versionCode": 5,
+      "permissions": [
+        "INTERNET",
+        "ACCESS_NETWORK_STATE",
+        "WRITE_EXTERNAL_STORAGE",
+        "READ_EXTERNAL_STORAGE"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/icon.png"
+    },
+    "plugins": []
+  }
+}
