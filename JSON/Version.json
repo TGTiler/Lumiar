@@ -1,5 +1,5 @@
 {
-  "Versao": "1.0.5",
-  "Download": "https://github.com/TGTiler/Lumiar/releases/download/APKS/Lumiar-v1.0.5.apk",
-  "Changelog": "Interface moderna estilo Play Store, chips de categorias, destaques automáticos, tratamento de imagens com fallback"
+  "Versao": "1.0.6",
+  "Download": "https://github.com/TGTiler/Lumiar/releases/download/APKS/Lumiar-v1.0.6.apk",
+  "Changelog": "Lightbox para screenshots, historico de navegacao, back button com double-tap sair, busca com destaque + recomendados"
 }
