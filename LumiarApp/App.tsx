@@ -7,6 +7,8 @@ import { AppDetailScreen } from './src/screens/AppDetailScreen';
 import { SettingsScreen } from './src/screens/SettingsScreen';
 import { ProfileModal } from './src/components/ProfileModal';
 import { BottomNav } from './src/components/BottomNav';
+import { UpdateModal } from './src/components/UpdateModal';
+import { checkForUpdate, UpdateInfo } from './src/services/versionCheck';
 
 type Tab = 'home' | 'settings';
 type Screen = 'main' | 'AppDetail';
@@ -22,9 +24,23 @@ export default function App() {
   const [screen, setScreen] = useState<Screen>('main');
   const [screenParams, setScreenParams] = useState<any>(null);
   const [showProfile, setShowProfile] = useState(false);
+  const [updateInfo, setUpdateInfo] = useState<UpdateInfo | null>(null);
+  const [showUpdate, setShowUpdate] = useState(false);
 
   const historyRef = useRef<HistoryEntry[]>([]);
   const lastBackPress = useRef<number>(0);
+
+  // Check for updates on app start
+  useEffect(() => {
+    const timer = setTimeout(async () => {
+      const info = await checkForUpdate();
+      if (info.available) {
+        setUpdateInfo(info);
+        setShowUpdate(true);
+      }
+    }, 3000);
+    return () => clearTimeout(timer);
+  }, []);
 
   const pushHistory = useCallback(() => {
     historyRef.current.push({ screen, tab: activeTab, params: screenParams });
@@ -66,25 +82,26 @@ export default function App() {
   // Back handler
   useEffect(() => {
     const handler = BackHandler.addEventListener('hardwareBackPress', () => {
-      // If profile modal is open, close it
+      if (showUpdate) {
+        setShowUpdate(false);
+        return true;
+      }
+
       if (showProfile) {
         setShowProfile(false);
         return true;
       }
 
-      // If we're on AppDetail, go back to home
       if (screen === 'AppDetail') {
         navigation.goBack();
         return true;
       }
 
-      // If we're on settings tab, switch to home
       if (activeTab === 'settings') {
         navigation.tabNavigate('home');
         return true;
       }
 
-      // We're on home root - double tap to exit
       const now = Date.now();
       if (now - lastBackPress.current < 2000) {
         BackHandler.exitApp();
@@ -99,7 +116,7 @@ export default function App() {
     });
 
     return () => handler.remove();
-  }, [screen, activeTab, showProfile]);
+  }, [screen, activeTab, showProfile, showUpdate]);
 
   const renderScreen = () => {
     if (screen === 'AppDetail') {
@@ -134,6 +151,12 @@ export default function App() {
         visible={showProfile}
         onClose={() => setShowProfile(false)}
         onSave={() => {}}
+      />
+
+      <UpdateModal
+        visible={showUpdate}
+        updateInfo={updateInfo}
+        onDismiss={() => setShowUpdate(false)}
       />
     </View>
   );
