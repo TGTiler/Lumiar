@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -8,6 +8,10 @@ import {
   StyleSheet,
   Image,
   Alert,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
+  Keyboard,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
@@ -86,63 +90,98 @@ export function ProfileModal({ visible, onClose, onSave }: ProfileModalProps) {
     onClose();
   };
 
+  const nameRef = useRef<TextInput>(null);
+  const avatarRef = useRef<TextInput>(null);
+
   return (
     <Modal visible={visible} transparent animationType="slide">
-      <View style={styles.overlay}>
-        <View style={styles.modal}>
-          <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>Perfil do Usuário</Text>
-            <TouchableOpacity onPress={onClose}>
-              <Ionicons name="close" size={24} color={Colors.textSecondary} />
-            </TouchableOpacity>
-          </View>
+      <KeyboardAvoidingView
+        style={styles.overlay}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      >
+        <TouchableOpacity
+          style={styles.overlayBg}
+          activeOpacity={1}
+          onPress={onClose}
+        >
+          <TouchableOpacity activeOpacity={1} style={styles.modal}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Perfil do Usuário</Text>
+              <TouchableOpacity onPress={onClose}>
+                <Ionicons name="close" size={24} color={Colors.textSecondary} />
+              </TouchableOpacity>
+            </View>
 
-          <View style={styles.avatarSection}>
-            {avatarUrl ? (
-              <Image source={{ uri: avatarUrl }} style={styles.avatarPreview} />
-            ) : (
-              <AvatarIcon name={name} size={80} />
-            )}
-            <TouchableOpacity style={styles.changeAvatarBtn}>
-              <Ionicons name="camera-outline" size={20} color={Colors.primaryLight} />
-              <Text style={styles.changeAvatarText}>Alterar Foto</Text>
-            </TouchableOpacity>
-          </View>
+            <ScrollView
+              style={styles.modalScroll}
+              contentContainerStyle={styles.modalScrollContent}
+              keyboardShouldPersistTaps="handled"
+              showsVerticalScrollIndicator={false}
+            >
+              <View style={styles.avatarSection}>
+                {avatarUrl ? (
+                  <Image source={{ uri: avatarUrl }} style={styles.avatarPreview} />
+                ) : (
+                  <AvatarIcon name={name} size={80} />
+                )}
+                <TouchableOpacity style={styles.changeAvatarBtn}>
+                  <Ionicons name="camera-outline" size={20} color={Colors.primaryLight} />
+                  <Text style={styles.changeAvatarText}>Alterar Foto</Text>
+                </TouchableOpacity>
+              </View>
 
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>URL da Foto de Perfil</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="https://exemplo.com/foto.jpg"
-              placeholderTextColor={Colors.textMuted}
-              value={avatarUrl}
-              onChangeText={setAvatarUrl}
-              autoCapitalize="none"
-            />
-          </View>
+              <View style={styles.inputGroup}>
+                <Text style={styles.label}>URL da Foto de Perfil</Text>
+                <TextInput
+                  ref={avatarRef}
+                  style={styles.input}
+                  placeholder="https://exemplo.com/foto.jpg"
+                  placeholderTextColor={Colors.textMuted}
+                  value={avatarUrl}
+                  onChangeText={setAvatarUrl}
+                  autoCapitalize="none"
+                  onFocus={() => {
+                    setTimeout(() => avatarRef.current?.measure?.((_fx, _fy, _w, _h, px, py) => {
+                      // Scroll modal to keep input visible
+                    }), 300);
+                  }}
+                />
+              </View>
 
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Nome de Usuário</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Seu nome"
-              placeholderTextColor={Colors.textMuted}
-              value={name}
-              onChangeText={setName}
-            />
-          </View>
+              <View style={styles.inputGroup}>
+                <Text style={styles.label}>Nome de Usuário</Text>
+                <TextInput
+                  ref={nameRef}
+                  style={styles.input}
+                  placeholder="Seu nome"
+                  placeholderTextColor={Colors.textMuted}
+                  value={name}
+                  onChangeText={setName}
+                  onFocus={() => {
+                    setTimeout(() => nameRef.current?.measure?.((_fx, _fy, _w, _h, px, py) => {
+                      // Scroll modal to keep input visible
+                    }), 300);
+                  }}
+                />
+              </View>
 
-          <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-            <Text style={styles.saveButtonText}>Salvar</Text>
+              <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
+                <Text style={styles.saveButtonText}>Salvar</Text>
+              </TouchableOpacity>
+            </ScrollView>
           </TouchableOpacity>
-        </View>
-      </View>
+        </TouchableOpacity>
+      </KeyboardAvoidingView>
     </Modal>
   );
 }
 
 const styles = StyleSheet.create({
   overlay: {
+    flex: 1,
+    justifyContent: 'flex-end',
+  },
+  overlayBg: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.7)',
     justifyContent: 'flex-end',
@@ -151,6 +190,12 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.backgroundLight,
     borderTopLeftRadius: BorderRadius.xl,
     borderTopRightRadius: BorderRadius.xl,
+    maxHeight: '85%',
+  },
+  modalScroll: {
+    maxHeight: '100%',
+  },
+  modalScrollContent: {
     padding: Spacing.lg,
     paddingBottom: Spacing.xxl,
   },

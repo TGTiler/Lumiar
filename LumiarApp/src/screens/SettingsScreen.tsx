@@ -204,6 +204,7 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: Spacing.md,
+    paddingTop: Spacing.xxl,
     paddingBottom: 120,
   },
   profileCard: {

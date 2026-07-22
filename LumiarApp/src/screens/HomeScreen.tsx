@@ -9,6 +9,8 @@ import {
   ActivityIndicator,
   TextInput,
   FlatList,
+  Animated,
+  Keyboard,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Spacing, BorderRadius } from '../constants/theme';
@@ -42,6 +44,9 @@ export function HomeScreen({ navigation, resetKey }: HomeScreenProps) {
   const featuredRef = useRef<FlatList>(null);
   const scrollRef = useRef<ScrollView>(null);
   const [featuredIndex, setFeaturedIndex] = useState(0);
+  const headerTranslateY = useRef(new Animated.Value(0)).current;
+  const lastScrollY = useRef(0);
+  const headerHidden = useRef(false);
 
   const loadData = useCallback(async () => {
     try {
@@ -77,8 +82,44 @@ export function HomeScreen({ navigation, resetKey }: HomeScreenProps) {
       setSearchResults(null);
       setSelectedCategory(null);
       scrollRef.current?.scrollTo({ y: 0, animated: true });
+      // Reset header
+      headerHidden.current = false;
+      Animated.timing(headerTranslateY, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: true,
+      }).start();
     }
   }, [resetKey]);
+
+  const handleScroll = (event: any) => {
+    const currentY = event.nativeEvent.contentOffset.y;
+    const diff = currentY - lastScrollY.current;
+
+    if (diff > 10 && !headerHidden.current && currentY > 50) {
+      // Scrolling down - hide header
+      headerHidden.current = true;
+      Animated.timing(headerTranslateY, {
+        toValue: -200,
+        duration: 300,
+        useNativeDriver: true,
+      }).start();
+    } else if (diff < -10 && headerHidden.current) {
+      // Scrolling up - show header
+      headerHidden.current = false;
+      Animated.timing(headerTranslateY, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: true,
+      }).start();
+    }
+
+    lastScrollY.current = currentY;
+  };
+
+  const dismissKeyboard = () => {
+    Keyboard.dismiss();
+  };
 
   const handleSearch = async (query: string) => {
     setSearchQuery(query);
@@ -128,9 +169,19 @@ export function HomeScreen({ navigation, resetKey }: HomeScreenProps) {
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
+        onScroll={handleScroll}
+        scrollEventThrottle={16}
+        keyboardShouldPersistTaps="handled"
       >
-        {/* Header */}
-        <View style={styles.header}>
+        {/* Header - Retractable */}
+        <Animated.View
+          style={[
+            styles.header,
+            {
+              transform: [{ translateY: headerTranslateY }],
+            },
+          ]}
+        >
           <View style={styles.headerTop}>
             <View>
               <Text style={styles.greeting}>Bem-vindo ao</Text>
@@ -160,9 +211,8 @@ export function HomeScreen({ navigation, resetKey }: HomeScreenProps) {
               </TouchableOpacity>
             )}
           </View>
-        </View>
 
-        {/* Category Chips */}
+        {/* Category Chips - Inside header for retract effect */}
         {!searchResults && (
           <View style={styles.chipsSection}>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipsList}>
@@ -187,6 +237,7 @@ export function HomeScreen({ navigation, resetKey }: HomeScreenProps) {
             </ScrollView>
           </View>
         )}
+        </Animated.View>
 
         {/* Search Results */}
         {searchResults !== null ? (
@@ -369,7 +420,14 @@ const styles = StyleSheet.create({
   loadingText: { color: Colors.textSecondary, marginTop: Spacing.md, fontSize: 16 },
   scrollView: { flex: 1 },
   scrollContent: { paddingBottom: 120 },
-  header: { paddingHorizontal: Spacing.md, paddingTop: Spacing.xl, paddingBottom: Spacing.sm },
+  header: {
+    paddingHorizontal: Spacing.md,
+    paddingTop: Spacing.xl,
+    paddingBottom: Spacing.sm,
+    backgroundColor: Colors.background + 'F0',
+    zIndex: 100,
+    elevation: 100,
+  },
   headerTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: Spacing.md },
   greeting: { color: Colors.textSecondary, fontSize: 13 },
   title: { color: Colors.text, fontSize: 26, fontWeight: 'bold' },

@@ -2,7 +2,7 @@ import { Platform } from 'react-native';
 import * as Updates from 'expo-updates';
 import { api, VersionData } from './api';
 
-const CURRENT_VERSION = '1.0.9';
+const CURRENT_VERSION = '1.1.0';
 
 export interface UpdateInfo {
   available: boolean;
