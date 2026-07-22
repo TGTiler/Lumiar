@@ -1,5 +1,5 @@
 {
   "Versao": "1.2.0",
-  "Download": "https://github.com/TGTiler/Lumiar/releases/download/APKS/Lumiar-v1.2.0.apk",
+  "Download": "https://github.com/TGTiler/Lumiar/releases/download/Lumiar/Lumiar-v1.2.0.apk",
   "Changelog": "Suporte a landscape com sidebar, navegacao por gamepad/foco, FlatList com paginação e infinite scroll"
 }
