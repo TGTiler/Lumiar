@@ -6,7 +6,6 @@ import {
   ScrollView,
   TouchableOpacity,
   StyleSheet,
-  RefreshControl,
   ActivityIndicator,
   TextInput,
   FlatList,
@@ -19,6 +18,7 @@ import { AvatarIcon, loadProfile, UserProfile } from '../components/ProfileModal
 
 interface HomeScreenProps {
   navigation: any;
+  resetKey?: number;
 }
 
 function isValidUrl(uri: string): boolean {
@@ -31,16 +31,16 @@ function getInitial(name: string): string {
   return (name || '?').charAt(0).toUpperCase();
 }
 
-export function HomeScreen({ navigation }: HomeScreenProps) {
+export function HomeScreen({ navigation, resetKey }: HomeScreenProps) {
   const [apps, setApps] = useState<AppData[]>([]);
   const [categories, setCategories] = useState<CategoryData[]>([]);
   const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<AppData[] | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [profile, setProfile] = useState<UserProfile>({ name: 'Usuário', avatarUrl: '' });
   const featuredRef = useRef<FlatList>(null);
+  const scrollRef = useRef<ScrollView>(null);
   const [featuredIndex, setFeaturedIndex] = useState(0);
 
   const loadData = useCallback(async () => {
@@ -57,7 +57,6 @@ export function HomeScreen({ navigation }: HomeScreenProps) {
       console.error('Error loading data:', error);
     } finally {
       setLoading(false);
-      setRefreshing(false);
     }
   }, []);
 
@@ -71,10 +70,15 @@ export function HomeScreen({ navigation }: HomeScreenProps) {
     }
   }, [navigation.params]);
 
-  const handleRefresh = () => {
-    setRefreshing(true);
-    loadData();
-  };
+  // Reset home when tabNavigate('home') is called
+  useEffect(() => {
+    if (resetKey && resetKey > 0) {
+      setSearchQuery('');
+      setSearchResults(null);
+      setSelectedCategory(null);
+      scrollRef.current?.scrollTo({ y: 0, animated: true });
+    }
+  }, [resetKey]);
 
   const handleSearch = async (query: string) => {
     setSearchQuery(query);
@@ -120,11 +124,10 @@ export function HomeScreen({ navigation }: HomeScreenProps) {
   return (
     <View style={styles.container}>
       <ScrollView
+        ref={scrollRef}
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor={Colors.primary} />
-        }
+        showsVerticalScrollIndicator={false}
       >
         {/* Header */}
         <View style={styles.header}>

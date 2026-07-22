@@ -106,11 +106,30 @@ class ApiService {
   async searchApps(query: string): Promise<AppData[]> {
     const apps = await this.fetchApps();
     const lowerQuery = query.toLowerCase();
-    return apps.filter(app =>
+
+    const matches = apps.filter(app =>
       app.NomeAPP.toLowerCase().includes(lowerQuery) ||
       (app.Descricao || app.descricao || '').toLowerCase().includes(lowerQuery) ||
       app.categoria.toLowerCase().includes(lowerQuery)
     );
+
+    // Sort by relevance: NomeAPP match first, then Descricao/categoria
+    return matches.sort((a, b) => {
+      const aName = a.NomeAPP.toLowerCase();
+      const bName = b.NomeAPP.toLowerCase();
+      const aNameMatch = aName.includes(lowerQuery);
+      const bNameMatch = bName.includes(lowerQuery);
+      if (aNameMatch && !bNameMatch) return -1;
+      if (!aNameMatch && bNameMatch) return 1;
+      // Both match name - prefer startsWith
+      if (aNameMatch && bNameMatch) {
+        const aStarts = aName.startsWith(lowerQuery);
+        const bStarts = bName.startsWith(lowerQuery);
+        if (aStarts && !bStarts) return -1;
+        if (!aStarts && bStarts) return 1;
+      }
+      return 0;
+    });
   }
 
   async getAppsByCategory(category: string): Promise<AppData[]> {

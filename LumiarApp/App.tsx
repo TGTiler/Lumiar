@@ -26,6 +26,7 @@ export default function App() {
   const [showProfile, setShowProfile] = useState(false);
   const [updateInfo, setUpdateInfo] = useState<UpdateInfo | null>(null);
   const [showUpdate, setShowUpdate] = useState(false);
+  const [homeResetKey, setHomeResetKey] = useState(0);
 
   const historyRef = useRef<HistoryEntry[]>([]);
   const lastBackPress = useRef<number>(0);
@@ -76,6 +77,9 @@ export default function App() {
       setActiveTab(tab);
       setScreen('main');
       setScreenParams(null);
+      if (tab === 'home') {
+        setHomeResetKey(prev => prev + 1);
+      }
     },
   };
 
@@ -132,7 +136,7 @@ export default function App() {
       return <SettingsScreen navigation={navigation} />;
     }
 
-    return <HomeScreen navigation={navigation} />;
+    return <HomeScreen navigation={navigation} resetKey={homeResetKey} />;
   };
 
   return (
