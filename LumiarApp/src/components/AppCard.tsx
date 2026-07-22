@@ -56,7 +56,7 @@ interface FeaturedCardProps {
 
 export function FeaturedCard({ app, onPress }: FeaturedCardProps) {
   return (
-    <TouchableOpacity style={styles.featuredCard} onPress={onPress} activeOpacity={0.7}>
+    <TouchableOpacity style={styles.featuredCard} onPress={onPress} activeOpacity={0.7} focusable={true}>
       <AppLogo uri={app.logo} name={app.NomeAPP} size={64} radius={BorderRadius.md} />
       <View style={styles.featuredInfo}>
         <Text style={styles.featuredName} numberOfLines={1}>{app.NomeAPP}</Text>
@@ -83,7 +83,7 @@ interface AppListItemProps {
 
 export function AppListItem({ app, onPress }: AppListItemProps) {
   return (
-    <TouchableOpacity style={styles.listItem} onPress={onPress} activeOpacity={0.7}>
+    <TouchableOpacity style={styles.listItem} onPress={onPress} activeOpacity={0.7} focusable={true}>
       <AppLogo uri={app.logo} name={app.NomeAPP} size={52} radius={BorderRadius.md} />
       <View style={styles.listInfo}>
         <Text style={styles.listName} numberOfLines={1}>{app.NomeAPP}</Text>

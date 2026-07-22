@@ -11,6 +11,8 @@ import {
   FlatList,
   Animated,
   Keyboard,
+  Dimensions,
+  Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Spacing, BorderRadius } from '../constants/theme';
@@ -33,6 +35,13 @@ function getInitial(name: string): string {
   return (name || '?').charAt(0).toUpperCase();
 }
 
+function isLandscape(): boolean {
+  const { width, height } = Dimensions.get('window');
+  return width > height;
+}
+
+const PAGE_SIZE = 10;
+
 export function HomeScreen({ navigation, resetKey }: HomeScreenProps) {
   const [apps, setApps] = useState<AppData[]>([]);
   const [categories, setCategories] = useState<CategoryData[]>([]);
@@ -47,6 +56,19 @@ export function HomeScreen({ navigation, resetKey }: HomeScreenProps) {
   const headerTranslateY = useRef(new Animated.Value(0)).current;
   const lastScrollY = useRef(0);
   const headerHidden = useRef(false);
+  const [landscape, setLandscape] = useState(isLandscape());
+
+  // Pagination state
+  const [displayedApps, setDisplayedApps] = useState<AppData[]>([]);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+
+  useEffect(() => {
+    const sub = Dimensions.addEventListener('change', ({ window }) => {
+      setLandscape(window.width > window.height);
+    });
+    return () => sub?.remove();
+  }, []);
 
   const loadData = useCallback(async () => {
     try {
@@ -58,6 +80,9 @@ export function HomeScreen({ navigation, resetKey }: HomeScreenProps) {
       setApps(appsData);
       setCategories(categoriesData);
       setProfile(profileData);
+      // Initialize pagination
+      setDisplayedApps(appsData.slice(0, PAGE_SIZE));
+      setHasMore(appsData.length > PAGE_SIZE);
     } catch (error) {
       console.error('Error loading data:', error);
     } finally {
@@ -75,50 +100,30 @@ export function HomeScreen({ navigation, resetKey }: HomeScreenProps) {
     }
   }, [navigation.params]);
 
-  // Reset home when tabNavigate('home') is called
   useEffect(() => {
     if (resetKey && resetKey > 0) {
       setSearchQuery('');
       setSearchResults(null);
       setSelectedCategory(null);
+      setDisplayedApps(apps.slice(0, PAGE_SIZE));
+      setHasMore(apps.length > PAGE_SIZE);
       scrollRef.current?.scrollTo({ y: 0, animated: true });
-      // Reset header
       headerHidden.current = false;
-      Animated.timing(headerTranslateY, {
-        toValue: 0,
-        duration: 300,
-        useNativeDriver: true,
-      }).start();
+      Animated.timing(headerTranslateY, { toValue: 0, duration: 300, useNativeDriver: true }).start();
     }
   }, [resetKey]);
 
   const handleScroll = (event: any) => {
     const currentY = event.nativeEvent.contentOffset.y;
     const diff = currentY - lastScrollY.current;
-
     if (diff > 10 && !headerHidden.current && currentY > 50) {
-      // Scrolling down - hide header
       headerHidden.current = true;
-      Animated.timing(headerTranslateY, {
-        toValue: -200,
-        duration: 300,
-        useNativeDriver: true,
-      }).start();
+      Animated.timing(headerTranslateY, { toValue: -200, duration: 300, useNativeDriver: true }).start();
     } else if (diff < -10 && headerHidden.current) {
-      // Scrolling up - show header
       headerHidden.current = false;
-      Animated.timing(headerTranslateY, {
-        toValue: 0,
-        duration: 300,
-        useNativeDriver: true,
-      }).start();
+      Animated.timing(headerTranslateY, { toValue: 0, duration: 300, useNativeDriver: true }).start();
     }
-
     lastScrollY.current = currentY;
-  };
-
-  const dismissKeyboard = () => {
-    Keyboard.dismiss();
   };
 
   const handleSearch = async (query: string) => {
@@ -135,13 +140,29 @@ export function HomeScreen({ navigation, resetKey }: HomeScreenProps) {
     navigation.navigate('AppDetail', { appId: app.ID });
   };
 
+  // Pagination
+  const loadMoreApps = useCallback(() => {
+    if (loadingMore || !hasMore || searchResults !== null) return;
+    setLoadingMore(true);
+    setTimeout(() => {
+      const currentLength = displayedApps.length;
+      const nextBatch = apps.slice(currentLength, currentLength + PAGE_SIZE);
+      if (nextBatch.length > 0) {
+        setDisplayedApps((prev) => [...prev, ...nextBatch]);
+        setHasMore(currentLength + nextBatch.length < apps.length);
+      } else {
+        setHasMore(false);
+      }
+      setLoadingMore(false);
+    }, 300);
+  }, [displayedApps, apps, loadingMore, hasMore, searchResults]);
+
   const filteredApps = selectedCategory
     ? apps.filter((a) => a.categoria === selectedCategory)
-    : apps;
+    : displayedApps;
 
   const featuredApps = api.getFeaturedApps(apps, 5);
 
-  // Get similar apps for search results - STRICT same category only
   const getSimilarApps = (targetApp: AppData): AppData[] => {
     const targetSlug = targetApp.CategoriaSlug || '';
     const targetSubSlug = targetApp.SubcategoriaSlug || '';
@@ -162,40 +183,25 @@ export function HomeScreen({ navigation, resetKey }: HomeScreenProps) {
     );
   }
 
-  return (
-    <View style={styles.container}>
-      <ScrollView
-        ref={scrollRef}
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-        onScroll={handleScroll}
-        scrollEventThrottle={16}
-        keyboardShouldPersistTaps="handled"
-      >
-        {/* Header - Retractable */}
-        <Animated.View
-          style={[
-            styles.header,
-            {
-              transform: [{ translateY: headerTranslateY }],
-            },
-          ]}
-        >
-          <View style={styles.headerTop}>
+  // Landscape render
+  if (landscape) {
+    return (
+      <View style={styles.landscapeContainer}>
+        <View style={styles.landscapeContent}>
+          {/* Header */}
+          <View style={styles.landscapeHeader}>
             <View>
-              <Text style={styles.greeting}>Bem-vindo ao</Text>
               <Text style={styles.title}>Lumiar Store</Text>
             </View>
             <TouchableOpacity
               style={styles.avatarButton}
               onPress={() => navigation.navigate('ProfileModal')}
             >
-              <AvatarIcon name={profile.name} size={40} />
+              <AvatarIcon name={profile.name} size={36} />
             </TouchableOpacity>
           </View>
 
-          {/* Search Bar */}
+          {/* Search */}
           <View style={styles.searchContainer}>
             <Ionicons name="search" size={18} color={Colors.textMuted} />
             <TextInput
@@ -212,13 +218,13 @@ export function HomeScreen({ navigation, resetKey }: HomeScreenProps) {
             )}
           </View>
 
-        {/* Category Chips - Inside header for retract effect */}
-        {!searchResults && (
-          <View style={styles.chipsSection}>
+          {/* Category Chips */}
+          {!searchResults && (
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipsList}>
               <TouchableOpacity
                 style={[styles.chip, !selectedCategory && styles.chipActive]}
                 onPress={() => setSelectedCategory(null)}
+                focusable={true}
               >
                 <Text style={[styles.chipText, !selectedCategory && styles.chipTextActive]}>Todos</Text>
               </TouchableOpacity>
@@ -227,6 +233,7 @@ export function HomeScreen({ navigation, resetKey }: HomeScreenProps) {
                   key={cat.slug}
                   style={[styles.chip, selectedCategory === cat.nome && styles.chipActive]}
                   onPress={() => setSelectedCategory(selectedCategory === cat.nome ? null : cat.nome)}
+                  focusable={true}
                 >
                   <Text style={styles.chipIcon}>{cat.icon}</Text>
                   <Text style={[styles.chipText, selectedCategory === cat.nome && styles.chipTextActive]}>
@@ -235,62 +242,196 @@ export function HomeScreen({ navigation, resetKey }: HomeScreenProps) {
                 </TouchableOpacity>
               ))}
             </ScrollView>
+          )}
+
+          {/* Search Results or All Apps - Landscape Grid */}
+          {searchResults !== null ? (
+            <ScrollView style={styles.landscapeScrollView}>
+              {searchResults.length > 0 ? (
+                <>
+                  {/* Featured */}
+                  <TouchableOpacity
+                    style={styles.landscapeFeatured}
+                    onPress={() => navigateToApp(searchResults[0])}
+                    focusable={true}
+                  >
+                    <Image source={{ uri: searchResults[0].logo }} style={styles.landscapeFeaturedLogo} />
+                    <View style={styles.landscapeFeaturedInfo}>
+                      <Text style={styles.landscapeFeaturedName}>{searchResults[0].NomeAPP}</Text>
+                      <Text style={styles.landscapeFeaturedDesc} numberOfLines={1}>
+                        {searchResults[0].Descricao || searchResults[0].descricao || ''}
+                      </Text>
+                      <Text style={styles.landscapeFeaturedVersion}>v{searchResults[0].Versao}</Text>
+                    </View>
+                  </TouchableOpacity>
+                  {/* Grid */}
+                  <View style={styles.landscapeGrid}>
+                    {searchResults.slice(1).map((app) => (
+                      <TouchableOpacity
+                        key={app.ID}
+                        style={styles.landscapeGridCard}
+                        onPress={() => navigateToApp(app)}
+                        focusable={true}
+                      >
+                        <Image source={{ uri: app.logo }} style={styles.landscapeGridLogo} />
+                        <Text style={styles.landscapeGridName} numberOfLines={1}>{app.NomeAPP}</Text>
+                        <Text style={styles.landscapeGridVersion}>v{app.Versao}</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                </>
+              ) : (
+                <View style={styles.emptyState}>
+                  <Ionicons name="search-outline" size={48} color={Colors.textMuted} />
+                  <Text style={styles.emptyText}>Nenhum app encontrado</Text>
+                </View>
+              )}
+            </ScrollView>
+          ) : (
+            <FlatList
+              data={filteredApps}
+              keyExtractor={(item) => item.ID}
+              numColumns={landscape ? 4 : undefined}
+              contentContainerStyle={styles.landscapeGrid}
+              showsVerticalScrollIndicator={false}
+              initialNumToRender={10}
+              maxToRenderPerBatch={8}
+              windowSize={5}
+              removeClippedSubviews={true}
+              onEndReached={loadMoreApps}
+              onEndReachedThreshold={0.5}
+              ListFooterComponent={loadingMore ? <ActivityIndicator color={Colors.primary} style={{ padding: 16 }} /> : null}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  style={styles.landscapeGridCard}
+                  onPress={() => navigateToApp(item)}
+                  focusable={true}
+                >
+                  <Image source={{ uri: item.logo }} style={styles.landscapeGridLogo} />
+                  <Text style={styles.landscapeGridName} numberOfLines={1}>{item.NomeAPP}</Text>
+                  <Text style={styles.landscapeGridVersion}>v{item.Versao}</Text>
+                </TouchableOpacity>
+              )}
+            />
+          )}
+        </View>
+      </View>
+    );
+  }
+
+  // Portrait render
+  return (
+    <View style={styles.container}>
+      <ScrollView
+        ref={scrollRef}
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+        onScroll={handleScroll}
+        scrollEventThrottle={16}
+        keyboardShouldPersistTaps="handled"
+      >
+        <Animated.View
+          style={[styles.header, { transform: [{ translateY: headerTranslateY }] }]}
+        >
+          <View style={styles.headerTop}>
+            <View>
+              <Text style={styles.greeting}>Bem-vindo ao</Text>
+              <Text style={styles.title}>Lumiar Store</Text>
+            </View>
+            <TouchableOpacity
+              style={styles.avatarButton}
+              onPress={() => navigation.navigate('ProfileModal')}
+              focusable={true}
+            >
+              <AvatarIcon name={profile.name} size={40} />
+            </TouchableOpacity>
           </View>
-        )}
+
+          <View style={styles.searchContainer}>
+            <Ionicons name="search" size={18} color={Colors.textMuted} />
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Buscar apps..."
+              placeholderTextColor={Colors.textMuted}
+              value={searchQuery}
+              onChangeText={handleSearch}
+            />
+            {searchQuery.length > 0 && (
+              <TouchableOpacity onPress={() => handleSearch('')}>
+                <Ionicons name="close-circle" size={18} color={Colors.textMuted} />
+              </TouchableOpacity>
+            )}
+          </View>
+
+          {!searchResults && (
+            <View style={styles.chipsSection}>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipsList}>
+                <TouchableOpacity
+                  style={[styles.chip, !selectedCategory && styles.chipActive]}
+                  onPress={() => setSelectedCategory(null)}
+                  focusable={true}
+                >
+                  <Text style={[styles.chipText, !selectedCategory && styles.chipTextActive]}>Todos</Text>
+                </TouchableOpacity>
+                {categories.map((cat) => (
+                  <TouchableOpacity
+                    key={cat.slug}
+                    style={[styles.chip, selectedCategory === cat.nome && styles.chipActive]}
+                    onPress={() => setSelectedCategory(selectedCategory === cat.nome ? null : cat.nome)}
+                    focusable={true}
+                  >
+                    <Text style={styles.chipIcon}>{cat.icon}</Text>
+                    <Text style={[styles.chipText, selectedCategory === cat.nome && styles.chipTextActive]}>
+                      {cat.nome}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            </View>
+          )}
         </Animated.View>
 
-        {/* Search Results */}
+        {/* Search Results - Portrait */}
         {searchResults !== null ? (
           <View style={styles.section}>
             {searchResults.length > 0 ? (
               <>
-                {/* Featured Search Result */}
-                {searchResults.length > 0 && (
-                  <View style={styles.searchFeatured}>
-                    <TouchableOpacity
-                      style={styles.searchFeaturedCard}
-                      onPress={() => navigateToApp(searchResults[0])}
-                      activeOpacity={0.7}
-                    >
-                      <View style={styles.searchFeaturedTop}>
-                        {isValidUrl(searchResults[0].logo) ? (
-                          <Image
-                            source={{ uri: searchResults[0].logo }}
-                            style={styles.searchFeaturedLogo}
-                            resizeMode="cover"
-                          />
-                        ) : (
-                          <View style={styles.searchFeaturedFallback}>
-                            <Text style={styles.searchFeaturedFallbackText}>
-                              {getInitial(searchResults[0].NomeAPP)}
-                            </Text>
-                          </View>
-                        )}
-                        <View style={styles.searchFeaturedInfo}>
-                          <Text style={styles.searchFeaturedName}>{searchResults[0].NomeAPP}</Text>
-                          <Text style={styles.searchFeaturedDesc} numberOfLines={2}>
-                            {searchResults[0].Descricao || searchResults[0].descricao || ''}
-                          </Text>
-                          <View style={styles.searchFeaturedMeta}>
-                            <Text style={styles.searchFeaturedVersion}>v{searchResults[0].Versao}</Text>
-                            <View style={styles.searchFeaturedBadge}>
-                              <Text style={styles.searchFeaturedBadgeText}>{searchResults[0].categoria}</Text>
-                            </View>
+                <View style={styles.searchFeatured}>
+                  <TouchableOpacity
+                    style={styles.searchFeaturedCard}
+                    onPress={() => navigateToApp(searchResults[0])}
+                    activeOpacity={0.7}
+                    focusable={true}
+                  >
+                    <View style={styles.searchFeaturedTop}>
+                      {isValidUrl(searchResults[0].logo) ? (
+                        <Image source={{ uri: searchResults[0].logo }} style={styles.searchFeaturedLogo} resizeMode="cover" />
+                      ) : (
+                        <View style={styles.searchFeaturedFallback}>
+                          <Text style={styles.searchFeaturedFallbackText}>{getInitial(searchResults[0].NomeAPP)}</Text>
+                        </View>
+                      )}
+                      <View style={styles.searchFeaturedInfo}>
+                        <Text style={styles.searchFeaturedName}>{searchResults[0].NomeAPP}</Text>
+                        <Text style={styles.searchFeaturedDesc} numberOfLines={2}>
+                          {searchResults[0].Descricao || searchResults[0].descricao || ''}
+                        </Text>
+                        <View style={styles.searchFeaturedMeta}>
+                          <Text style={styles.searchFeaturedVersion}>v{searchResults[0].Versao}</Text>
+                          <View style={styles.searchFeaturedBadge}>
+                            <Text style={styles.searchFeaturedBadgeText}>{searchResults[0].categoria}</Text>
                           </View>
                         </View>
                       </View>
-                      <TouchableOpacity
-                        style={styles.searchInstallBtn}
-                        onPress={() => navigateToApp(searchResults[0])}
-                      >
-                        <Ionicons name="download-outline" size={18} color={Colors.text} />
-                        <Text style={styles.searchInstallText}>Instalar</Text>
-                      </TouchableOpacity>
+                    </View>
+                    <TouchableOpacity style={styles.searchInstallBtn} onPress={() => navigateToApp(searchResults[0])}>
+                      <Ionicons name="download-outline" size={18} color={Colors.text} />
+                      <Text style={styles.searchInstallText}>Instalar</Text>
                     </TouchableOpacity>
-                  </View>
-                )}
+                  </TouchableOpacity>
+                </View>
 
-                {/* Similar Apps */}
                 {(() => {
                   const similar = getSimilarApps(searchResults[0]);
                   if (similar.length === 0) return null;
@@ -308,6 +449,7 @@ export function HomeScreen({ navigation, resetKey }: HomeScreenProps) {
                             style={styles.similarCard}
                             onPress={() => navigateToApp(item)}
                             activeOpacity={0.7}
+                            focusable={true}
                           >
                             {isValidUrl(item.logo) ? (
                               <Image source={{ uri: item.logo }} style={styles.similarLogo} resizeMode="cover" />
@@ -325,7 +467,6 @@ export function HomeScreen({ navigation, resetKey }: HomeScreenProps) {
                   );
                 })()}
 
-                {/* Other results - all remaining search results not in featured or similar */}
                 {(() => {
                   const featuredApp = searchResults[0];
                   const similarIds = getSimilarApps(featuredApp).map(s => s.ID);
@@ -352,7 +493,6 @@ export function HomeScreen({ navigation, resetKey }: HomeScreenProps) {
           </View>
         ) : (
           <>
-            {/* Featured Section */}
             {!selectedCategory && featuredApps.length > 0 && (
               <View style={styles.section}>
                 <View style={styles.sectionHeader}>
@@ -382,17 +522,14 @@ export function HomeScreen({ navigation, resetKey }: HomeScreenProps) {
                 {featuredApps.length > 1 && (
                   <View style={styles.dotsContainer}>
                     {featuredApps.map((_, i) => (
-                      <View
-                        key={i}
-                        style={[styles.dot, i === featuredIndex && styles.dotActive]}
-                      />
+                      <View key={i} style={[styles.dot, i === featuredIndex && styles.dotActive]} />
                     ))}
                   </View>
                 )}
               </View>
             )}
 
-            {/* All Apps / Filtered */}
+            {/* All Apps - FlatList with Pagination */}
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>
                 {selectedCategory ? selectedCategory : 'Todos os Apps'}
@@ -400,6 +537,7 @@ export function HomeScreen({ navigation, resetKey }: HomeScreenProps) {
               {filteredApps.map((app) => (
                 <AppListItem key={app.ID} app={app} onPress={() => navigateToApp(app)} />
               ))}
+              {loadingMore && <ActivityIndicator color={Colors.primary} style={{ padding: 16 }} />}
               {filteredApps.length === 0 && (
                 <View style={styles.emptyState}>
                   <Ionicons name="folder-open-outline" size={48} color={Colors.textMuted} />
@@ -415,18 +553,15 @@ export function HomeScreen({ navigation, resetKey }: HomeScreenProps) {
 }
 
 const styles = StyleSheet.create({
+  // Portrait
   container: { flex: 1, backgroundColor: Colors.background },
   loadingContainer: { flex: 1, backgroundColor: Colors.background, justifyContent: 'center', alignItems: 'center' },
   loadingText: { color: Colors.textSecondary, marginTop: Spacing.md, fontSize: 16 },
   scrollView: { flex: 1 },
   scrollContent: { paddingBottom: 120 },
   header: {
-    paddingHorizontal: Spacing.md,
-    paddingTop: Spacing.xl,
-    paddingBottom: Spacing.sm,
-    backgroundColor: Colors.background + 'F0',
-    zIndex: 100,
-    elevation: 100,
+    paddingHorizontal: Spacing.md, paddingTop: Spacing.xl, paddingBottom: Spacing.sm,
+    backgroundColor: Colors.background + 'F0', zIndex: 100, elevation: 100,
   },
   headerTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: Spacing.md },
   greeting: { color: Colors.textSecondary, fontSize: 13 },
@@ -460,7 +595,7 @@ const styles = StyleSheet.create({
   emptyState: { alignItems: 'center', paddingVertical: Spacing.xxl },
   emptyText: { color: Colors.textMuted, fontSize: 15, marginTop: Spacing.md },
 
-  // Search Featured
+  // Search Featured (Portrait)
   searchFeatured: { marginBottom: Spacing.lg },
   searchFeaturedCard: {
     backgroundColor: Colors.backgroundCard, borderRadius: BorderRadius.lg,
@@ -468,10 +603,7 @@ const styles = StyleSheet.create({
   },
   searchFeaturedTop: { flexDirection: 'row', marginBottom: Spacing.md },
   searchFeaturedLogo: { width: 72, height: 72, borderRadius: BorderRadius.md, backgroundColor: Colors.surface },
-  searchFeaturedFallback: {
-    width: 72, height: 72, borderRadius: BorderRadius.md, backgroundColor: Colors.primary,
-    justifyContent: 'center', alignItems: 'center',
-  },
+  searchFeaturedFallback: { width: 72, height: 72, borderRadius: BorderRadius.md, backgroundColor: Colors.primary, justifyContent: 'center', alignItems: 'center' },
   searchFeaturedFallbackText: { color: Colors.text, fontSize: 28, fontWeight: 'bold' },
   searchFeaturedInfo: { flex: 1, marginLeft: Spacing.md },
   searchFeaturedName: { color: Colors.text, fontSize: 18, fontWeight: 'bold', marginBottom: 2 },
@@ -485,22 +617,43 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.primary, paddingVertical: Spacing.md, borderRadius: BorderRadius.md, gap: Spacing.sm,
   },
   searchInstallText: { color: Colors.text, fontSize: 15, fontWeight: '700' },
-
-  // Similar Apps
   similarSection: { marginBottom: Spacing.lg },
   similarList: { paddingBottom: Spacing.sm, gap: Spacing.sm },
-  similarCard: {
-    width: 100, alignItems: 'center', backgroundColor: Colors.backgroundCard,
-    borderRadius: BorderRadius.md, padding: Spacing.sm, borderWidth: 1, borderColor: Colors.border,
-  },
+  similarCard: { width: 100, alignItems: 'center', backgroundColor: Colors.backgroundCard, borderRadius: BorderRadius.md, padding: Spacing.sm, borderWidth: 1, borderColor: Colors.border },
   similarLogo: { width: 56, height: 56, borderRadius: BorderRadius.md, backgroundColor: Colors.surface, marginBottom: Spacing.xs },
-  similarFallback: {
-    width: 56, height: 56, borderRadius: BorderRadius.md, backgroundColor: Colors.primary + '30',
-    justifyContent: 'center', alignItems: 'center', marginBottom: Spacing.xs,
-  },
+  similarFallback: { width: 56, height: 56, borderRadius: BorderRadius.md, backgroundColor: Colors.primary + '30', justifyContent: 'center', alignItems: 'center', marginBottom: Spacing.xs },
   similarFallbackText: { color: Colors.primaryLight, fontSize: 20, fontWeight: 'bold' },
   similarName: { color: Colors.text, fontSize: 12, fontWeight: '600', textAlign: 'center' },
   similarVersion: { color: Colors.textMuted, fontSize: 10, marginTop: 2 },
-
   otherResults: { marginTop: Spacing.sm },
+
+  // Landscape
+  landscapeContainer: { flex: 1, backgroundColor: Colors.background, flexDirection: 'row' },
+  landscapeContent: { flex: 1, paddingLeft: 72 + Spacing.md, padding: Spacing.md },
+  landscapeHeader: {
+    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
+    marginBottom: Spacing.md, paddingTop: Spacing.sm,
+  },
+  landscapeScrollView: { flex: 1 },
+  landscapeFeatured: {
+    flexDirection: 'row', backgroundColor: Colors.backgroundCard,
+    borderRadius: BorderRadius.lg, padding: Spacing.md, marginBottom: Spacing.md,
+    borderWidth: 1, borderColor: Colors.primary + '40',
+  },
+  landscapeFeaturedLogo: { width: 64, height: 64, borderRadius: BorderRadius.md, backgroundColor: Colors.surface },
+  landscapeFeaturedInfo: { flex: 1, marginLeft: Spacing.md, justifyContent: 'center' },
+  landscapeFeaturedName: { color: Colors.text, fontSize: 16, fontWeight: 'bold' },
+  landscapeFeaturedDesc: { color: Colors.textSecondary, fontSize: 12, marginTop: 2 },
+  landscapeFeaturedVersion: { color: Colors.textMuted, fontSize: 11, marginTop: 4 },
+  landscapeGrid: {
+    flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.md,
+  },
+  landscapeGridCard: {
+    width: (Dimensions.get('window').width - 72 - Spacing.md * 5) / 4,
+    backgroundColor: Colors.backgroundCard, borderRadius: BorderRadius.md,
+    padding: Spacing.sm, alignItems: 'center', borderWidth: 1, borderColor: Colors.border,
+  },
+  landscapeGridLogo: { width: 56, height: 56, borderRadius: BorderRadius.md, backgroundColor: Colors.surface, marginBottom: Spacing.xs },
+  landscapeGridName: { color: Colors.text, fontSize: 12, fontWeight: '600', textAlign: 'center' },
+  landscapeGridVersion: { color: Colors.textMuted, fontSize: 10 },
 });
