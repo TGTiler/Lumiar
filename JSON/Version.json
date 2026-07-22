@@ -1,5 +1,5 @@
 {
   "Versao": "1.0.9",
-  "Download": "https://github.com/TGTiler/Lumiar/releases/download/APKS/Lumiar-v1.0.9.apk",
+  "Download": "https://github.com/TGTiler/Lumiar/releases/download/Lumiar/Lumiar-v1.0.9.apk",
   "Changelog": "Correcao de busca por relevancia (NomeAPP primeiro), botao Inicio reseta tela, removido pull-to-refresh"
 }
