@@ -449,22 +449,6 @@ const styles = StyleSheet.create({
   landscapeContainer: { flex: 1, backgroundColor: Colors.background, flexDirection: 'row' },
   landscapeContent: { flex: 1, paddingLeft: 72 + Spacing.md, padding: Spacing.md },
   landscapeHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: Spacing.md, paddingTop: Spacing.sm },
-  searchContainer: {
-    flexDirection: 'row', alignItems: 'center', backgroundColor: Colors.backgroundCard,
-    borderRadius: BorderRadius.md, paddingHorizontal: Spacing.md, height: 44,
-    borderWidth: 1, borderColor: Colors.border, marginBottom: Spacing.sm,
-  },
-  searchInput: { flex: 1, height: 44, color: Colors.text, fontSize: 15, marginLeft: Spacing.sm },
-  chipsList: { paddingHorizontal: Spacing.md, gap: Spacing.sm },
-  chip: {
-    flexDirection: 'row', alignItems: 'center', backgroundColor: Colors.chipInactive,
-    borderRadius: BorderRadius.xl, paddingHorizontal: Spacing.md, paddingVertical: Spacing.sm,
-    borderWidth: 1, borderColor: Colors.chipBorder, gap: Spacing.xs,
-  },
-  chipActive: { backgroundColor: Colors.chipActive, borderColor: Colors.chipActive },
-  chipIcon: { fontSize: 14 },
-  chipText: { color: Colors.textSecondary, fontSize: 13, fontWeight: '500' },
-  chipTextActive: { color: Colors.text, fontWeight: '600' },
   landscapeGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.md },
   landscapeGridCard: {
     width: (Dimensions.get('window').width - 72 - Spacing.md * 5) / 4,
