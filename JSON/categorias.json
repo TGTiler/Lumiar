@@ -77,6 +77,12 @@
       "slug": "navegacao",
       "icon": "🌐",
       "color": "#4f94de"
+    },
+    {
+      "nome": "Finanças & Gestão",
+      "slug": "financas",
+      "icon": "💰",
+      "color": "#59de4f"
     }
   ],
   "subcategories": [
@@ -389,6 +395,36 @@
       "nome": "Bateria & Autonomia",
       "slug": "bateria-autonomia",
       "parent": "Otimização & Performance"
+    },
+    {
+      "nome": "Blockchain & Criptomoedas",
+      "slug": "blockchain-criptomoedas",
+      "parent": "Utilidades"
+    },
+    {
+      "nome": "Gestão Pessoal & Controle Financeiro",
+      "slug": "controle-pessoal",
+      "parent": "Finanças & Gestão"
+    },
+    {
+      "nome": "Criptomoedas & Web3",
+      "slug": "cripto-web3",
+      "parent": "Finanças & Gestão"
+    },
+    {
+      "nome": "Investimentos & Mercado Financeiro",
+      "slug": "investimentos",
+      "parent": "Finanças & Gestão"
+    },
+    {
+      "nome": "Ferramentas de Negócios & MEI",
+      "slug": "negocios-mei",
+      "parent": "Finanças & Gestão"
+    },
+    {
+      "nome": "Calculadoras & Conversores",
+      "slug": "calculadoras-financeiras",
+      "parent": "Finanças & Gestão"
     }
   ]
 }
