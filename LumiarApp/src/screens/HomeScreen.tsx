@@ -19,6 +19,7 @@ import { Colors, Spacing, BorderRadius } from '../constants/theme';
 import { api, AppData, CategoryData } from '../services/api';
 import { FeaturedCard, AppListItem } from '../components/AppCard';
 import { AvatarIcon, loadProfile, UserProfile } from '../components/ProfileModal';
+import { getFeedSorted } from '../services/preferences';
 
 interface HomeScreenProps {
   navigation: any;
@@ -56,6 +57,7 @@ export function HomeScreen({ navigation, resetKey }: HomeScreenProps) {
   const headerTranslateY = useRef(new Animated.Value(0)).current;
   const lastScrollY = useRef(0);
   const headerHidden = useRef(false);
+  const savedScrollY = useRef(0);
   const [landscape, setLandscape] = useState(isLandscape());
 
   // Pagination state
@@ -77,12 +79,12 @@ export function HomeScreen({ navigation, resetKey }: HomeScreenProps) {
         api.fetchCategories(),
         loadProfile(),
       ]);
-      setApps(appsData);
+      const sortedApps = await getFeedSorted(appsData);
+      setApps(sortedApps);
       setCategories(categoriesData);
       setProfile(profileData);
-      // Initialize pagination
-      setDisplayedApps(appsData.slice(0, PAGE_SIZE));
-      setHasMore(appsData.length > PAGE_SIZE);
+      setDisplayedApps(sortedApps.slice(0, PAGE_SIZE));
+      setHasMore(sortedApps.length > PAGE_SIZE);
     } catch (error) {
       console.error('Error loading data:', error);
     } finally {
@@ -97,6 +99,12 @@ export function HomeScreen({ navigation, resetKey }: HomeScreenProps) {
   useEffect(() => {
     if (navigation.params?.profileUpdated) {
       loadProfile().then(setProfile);
+    }
+    // Restore scroll position when returning from detail
+    if (navigation.params?.returning && savedScrollY.current > 0) {
+      setTimeout(() => {
+        scrollRef.current?.scrollTo({ y: savedScrollY.current, animated: false });
+      }, 100);
     }
   }, [navigation.params]);
 
@@ -127,6 +135,7 @@ export function HomeScreen({ navigation, resetKey }: HomeScreenProps) {
       Animated.timing(headerTranslateY, { toValue: 0, duration: 300, useNativeDriver: true }).start();
     }
     lastScrollY.current = currentY;
+    savedScrollY.current = currentY;
 
     // Infinite scroll: load more when near bottom
     const distanceFromBottom = contentSize.height - layoutMeasurement.height - currentY;

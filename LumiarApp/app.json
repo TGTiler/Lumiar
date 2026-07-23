@@ -2,7 +2,7 @@
   "expo": {
     "name": "Lumiar Store",
     "slug": "lumiar-store",
-    "version": "1.2.1",
+    "version": "1.2.2",
     "orientation": "default",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
@@ -16,7 +16,7 @@
         "backgroundColor": "#8A2BE2"
       },
       "package": "com.tgtiler.lumiar",
-      "versionCode": 12,
+      "versionCode": 13,
       "permissions": [
         "INTERNET",
         "ACCESS_NETWORK_STATE",

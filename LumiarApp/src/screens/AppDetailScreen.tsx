@@ -16,6 +16,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Colors, Spacing, BorderRadius } from '../constants/theme';
 import { api, AppData } from '../services/api';
 import { Lightbox } from '../components/Lightbox';
+import { trackView, trackDownload } from '../services/preferences';
 
 const { width } = Dimensions.get('window');
 
@@ -101,6 +102,9 @@ export function AppDetailScreen({ route, navigation }: AppDetailScreenProps) {
     try {
       const appData = await api.getAppById(appId);
       setApp(appData || null);
+      if (appData) {
+        trackView(appData.SubcategoriaSlug || '');
+      }
     } catch (error) {
       console.error('Error loading app:', error);
     } finally {
@@ -119,6 +123,7 @@ export function AppDetailScreen({ route, navigation }: AppDetailScreenProps) {
   const confirmDownload = async () => {
     setShowWarning(false);
     if (!app?.url_apk) return;
+    trackDownload(app.SubcategoriaSlug || '');
     setDownloading(true);
     try {
       const supported = await Linking.canOpenURL(app.url_apk);
