@@ -39,6 +39,14 @@ function AppBanner({ uri, name }: { uri: string; name: string }) {
   return <Image source={{ uri }} style={styles.bannerImage} resizeMode="cover" onError={() => setHasError(true)} />;
 }
 
+function AppLogoSmall({ uri, name }: { uri: string; name: string }) {
+  const [hasError, setHasError] = React.useState(false);
+  if (hasError || !isValidUrl(uri)) {
+    return <View style={styles.logoFallback}><Text style={styles.logoFallbackText}>{getInitial(name)}</Text></View>;
+  }
+  return <Image source={{ uri }} style={styles.logoImage} resizeMode="cover" onError={() => setHasError(true)} />;
+}
+
 interface AppDetailScreenProps {
   route: { params: { appId: string } };
   navigation: any;
