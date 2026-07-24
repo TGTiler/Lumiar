@@ -11,6 +11,7 @@ import {
   Linking,
   Dimensions,
   Modal,
+  Share,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Spacing, BorderRadius } from '../constants/theme';
@@ -93,6 +94,20 @@ export function AppDetailScreen({ route, navigation }: AppDetailScreenProps) {
     }
   };
 
+  const compartilharApp = async () => {
+    if (!app) return;
+    try {
+      const shareUrl = `https://lumiarstore.app/app/${app.ID}`;
+      await Share.share({
+        title: app.NomeAPP,
+        message: `Confira o ${app.NomeAPP} na Lumiar Store!\n${shareUrl}`,
+        url: shareUrl,
+      });
+    } catch (error) {
+      console.error('Erro ao compartilhar:', error);
+    }
+  };
+
   if (loading) {
     return <View style={styles.loadingContainer}><ActivityIndicator size="large" color={Colors.primary} /></View>;
   }
@@ -118,6 +133,9 @@ export function AppDetailScreen({ route, navigation }: AppDetailScreenProps) {
           <View style={styles.bannerOverlay} />
           <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
             <Ionicons name="arrow-back" size={22} color={Colors.text} />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.shareBtn} onPress={compartilharApp}>
+            <Ionicons name="share-social-outline" size={20} color={Colors.text} />
           </TouchableOpacity>
         </View>
 
@@ -224,6 +242,7 @@ const styles = StyleSheet.create({
   fallbackBannerText: { color: Colors.text, fontSize: 64, fontWeight: 'bold', opacity: 0.3 },
   bannerOverlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.3)' },
   backBtn: { position: 'absolute', top: Spacing.xl, left: Spacing.md, width: 36, height: 36, borderRadius: 18, backgroundColor: Colors.overlay, justifyContent: 'center', alignItems: 'center' },
+  shareBtn: { position: 'absolute', top: Spacing.xl, right: Spacing.md, width: 36, height: 36, borderRadius: 18, backgroundColor: Colors.overlay, justifyContent: 'center', alignItems: 'center' },
   appInfo: { padding: Spacing.lg, marginTop: -Spacing.xxl },
   appHeader: { flexDirection: 'row', marginBottom: Spacing.lg },
   logoImage: { width: 88, height: 88, borderRadius: 18, backgroundColor: Colors.surface },

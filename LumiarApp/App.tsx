@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { View, BackHandler, ToastAndroid, Platform } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
+import * as Linking from 'expo-linking';
 import { Colors } from './src/constants/theme';
 import { HomeScreen } from './src/screens/HomeScreen';
 import { AppDetailScreen } from './src/screens/AppDetailScreen';
@@ -9,6 +10,7 @@ import { ProfileModal } from './src/components/ProfileModal';
 import { BottomNav } from './src/components/BottomNav';
 import { UpdateModal } from './src/components/UpdateModal';
 import { checkForUpdate, UpdateInfo } from './src/services/versionCheck';
+import { api } from './src/services/api';
 
 type Tab = 'home' | 'settings';
 
@@ -33,6 +35,36 @@ export default function App() {
       }
     }, 3000);
     return () => clearTimeout(timer);
+  }, []);
+
+  // Deep linking: handle URLs like lumiarstore://app/com.telegram.messenger
+  useEffect(() => {
+    const handleUrl = async (url: string) => {
+      const parsed = Linking.parse(url);
+      const path = parsed.path || '';
+      // Match pattern: app/:appId
+      const match = path.match(/^app\/(.+)$/);
+      if (match) {
+        const appId = match[1];
+        const appData = await api.getAppById(appId);
+        if (appData) {
+          setDetailAppId(appData.ID);
+          setShowDetail(true);
+        }
+      }
+    };
+
+    // Handle URL when app is already open
+    const subscription = Linking.addEventListener('url', ({ url }) => {
+      handleUrl(url);
+    });
+
+    // Handle URL when app is opened from a link (cold start)
+    Linking.getInitialURL().then((url) => {
+      if (url) handleUrl(url);
+    });
+
+    return () => subscription.remove();
   }, []);
 
   const navigation = {

@@ -1,5 +1,5 @@
 {
-  "Versao": "1.2.4",
-  "Download": "https://github.com/TGTiler/Lumiar/releases/download/Lumiar/Lumiar-v1.2.4.apk",
-  "Changelog": "Download via navegador, fix reset de tela ao voltar, logo 88x88, sem mais carregando ao retornar"
+  "Versao": "1.2.5",
+  "Download": "https://github.com/TGTiler/Lumiar/releases/download/Lumiar/Lumiar-v1.2.5.apk",
+  "Changelog": "Compartilhamento de apps, Deep Linking (lumiarstore://), botao de compartilhar na tela de detalhes"
 }
