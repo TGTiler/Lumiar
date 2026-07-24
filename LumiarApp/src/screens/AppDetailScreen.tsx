@@ -17,7 +17,6 @@ import { Colors, Spacing, BorderRadius } from '../constants/theme';
 import { api, AppData } from '../services/api';
 import { Lightbox } from '../components/Lightbox';
 import { trackView, trackDownload } from '../services/preferences';
-import { downloadManager, DownloadState } from '../services/downloadManager';
 
 const { width } = Dimensions.get('window');
 const SCREENSHOT_WIDTH = width * 0.65;
@@ -40,18 +39,6 @@ function AppBanner({ uri, name }: { uri: string; name: string }) {
   return <Image source={{ uri }} style={styles.bannerImage} resizeMode="cover" onError={() => setHasError(true)} />;
 }
 
-function AppLogoSmall({ uri, name }: { uri: string; name: string }) {
-  const [hasError, setHasError] = React.useState(false);
-  if (hasError || !isValidUrl(uri)) {
-    return (
-      <View style={styles.logoFallback}>
-        <Text style={styles.logoFallbackText}>{getInitial(name)}</Text>
-      </View>
-    );
-  }
-  return <Image source={{ uri }} style={styles.logoImage} resizeMode="cover" onError={() => setHasError(true)} />;
-}
-
 interface AppDetailScreenProps {
   route: { params: { appId: string } };
   navigation: any;
@@ -62,13 +49,10 @@ export function AppDetailScreen({ route, navigation }: AppDetailScreenProps) {
   const [app, setApp] = useState<AppData | null>(null);
   const [loading, setLoading] = useState(true);
   const [showWarning, setShowWarning] = useState(false);
-  const [downloadState, setDownloadState] = useState<DownloadState>({ status: 'idle', progress: 0, localUri: null });
   const [lightboxUri, setLightboxUri] = useState<string | null>(null);
 
   useEffect(() => {
     loadApp();
-    const unsub = downloadManager.subscribe(appId, setDownloadState);
-    return unsub;
   }, [appId]);
 
   const loadApp = async () => {
@@ -92,15 +76,14 @@ export function AppDetailScreen({ route, navigation }: AppDetailScreenProps) {
     setShowWarning(false);
     if (!app?.url_apk) return;
     trackDownload(app.SubcategoriaSlug || '');
-    await downloadManager.downloadApk(app.ID, app.url_apk);
+    try {
+      const supported = await Linking.canOpenURL(app.url_apk);
+      if (supported) await Linking.openURL(app.url_apk);
+      else Alert.alert('Erro', 'Não foi possível abrir o link');
+    } catch {
+      Alert.alert('Erro', 'Falha ao iniciar download');
+    }
   };
-
-  const handleInstall = async () => {
-    if (!app) return;
-    await downloadManager.installApk(app.ID);
-  };
-
-  const progressPercent = Math.round(downloadState.progress * 100);
 
   if (loading) {
     return <View style={styles.loadingContainer}><ActivityIndicator size="large" color={Colors.primary} /></View>;
@@ -117,41 +100,6 @@ export function AppDetailScreen({ route, navigation }: AppDetailScreenProps) {
       </View>
     );
   }
-
-  const renderDownloadButton = () => {
-    switch (downloadState.status) {
-      case 'downloading':
-        return (
-          <View style={styles.progressContainer}>
-            <View style={styles.progressBar}>
-              <View style={[styles.progressFill, { width: `${progressPercent}%` }]} />
-            </View>
-            <Text style={styles.progressText}>Baixando... {progressPercent}%</Text>
-          </View>
-        );
-      case 'completed':
-        return (
-          <TouchableOpacity style={styles.installButton} onPress={handleInstall}>
-            <Ionicons name="open-outline" size={20} color={Colors.text} />
-            <Text style={styles.installButtonText}>Abrir</Text>
-          </TouchableOpacity>
-        );
-      case 'installing':
-        return (
-          <View style={styles.progressContainer}>
-            <ActivityIndicator color={Colors.primary} size="small" />
-            <Text style={styles.progressText}>Instalando...</Text>
-          </View>
-        );
-      default:
-        return (
-          <TouchableOpacity style={styles.downloadButton} onPress={handleDownload}>
-            <Ionicons name="download-outline" size={20} color={Colors.text} />
-            <Text style={styles.downloadButtonText}>Instalar</Text>
-          </TouchableOpacity>
-        );
-    }
-  };
 
   return (
     <View style={styles.container}>
@@ -178,8 +126,11 @@ export function AppDetailScreen({ route, navigation }: AppDetailScreenProps) {
             </View>
           </View>
 
-          {/* Download Button / Progress */}
-          {renderDownloadButton()}
+          {/* Download Button */}
+          <TouchableOpacity style={styles.downloadButton} onPress={handleDownload}>
+            <Ionicons name="download-outline" size={20} color={Colors.text} />
+            <Text style={styles.downloadButtonText}>Instalar</Text>
+          </TouchableOpacity>
 
           {/* Description */}
           <View style={styles.descSection}>
@@ -206,7 +157,6 @@ export function AppDetailScreen({ route, navigation }: AppDetailScreenProps) {
             </View>
           )}
 
-          {/* Info Cards */}
           <View style={styles.infoCards}>
             <View style={styles.infoCard}>
               <Ionicons name="cube-outline" size={20} color={Colors.primary} />
@@ -224,24 +174,10 @@ export function AppDetailScreen({ route, navigation }: AppDetailScreenProps) {
 
       {/* Bottom Bar */}
       <View style={styles.bottomBar}>
-        {downloadState.status === 'idle' ? (
-          <TouchableOpacity style={styles.bottomDownloadBtn} onPress={handleDownload}>
-            <Ionicons name="download" size={20} color={Colors.text} />
-            <Text style={styles.bottomDownloadText}>Instalar</Text>
-          </TouchableOpacity>
-        ) : downloadState.status === 'completed' ? (
-          <TouchableOpacity style={styles.bottomInstallBtn} onPress={handleInstall}>
-            <Ionicons name="open" size={20} color={Colors.text} />
-            <Text style={styles.bottomInstallText}>Abrir</Text>
-          </TouchableOpacity>
-        ) : (
-          <View style={styles.bottomProgress}>
-            <View style={styles.progressBar}>
-              <View style={[styles.progressFill, { width: `${progressPercent}%` }]} />
-            </View>
-            <Text style={styles.progressText}>{progressPercent}%</Text>
-          </View>
-        )}
+        <TouchableOpacity style={styles.bottomDownloadBtn} onPress={handleDownload}>
+          <Ionicons name="download" size={20} color={Colors.text} />
+          <Text style={styles.bottomDownloadText}>Instalar</Text>
+        </TouchableOpacity>
       </View>
 
       {/* Warning Modal */}
@@ -274,16 +210,12 @@ const styles = StyleSheet.create({
   backHomeText: { color: Colors.text, fontSize: 16, fontWeight: '600' },
   scroll: { flex: 1 },
   scrollContent: { paddingBottom: 100 },
-
-  // Banner
   bannerContainer: { width, height: 220, position: 'relative' },
   bannerImage: { width: '100%', height: '100%' },
   fallbackBanner: { width: '100%', height: '100%', backgroundColor: Colors.primary, justifyContent: 'center', alignItems: 'center' },
   fallbackBannerText: { color: Colors.text, fontSize: 64, fontWeight: 'bold', opacity: 0.3 },
   bannerOverlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.3)' },
   backBtn: { position: 'absolute', top: Spacing.xl, left: Spacing.md, width: 36, height: 36, borderRadius: 18, backgroundColor: Colors.overlay, justifyContent: 'center', alignItems: 'center' },
-
-  // App Info
   appInfo: { padding: Spacing.lg, marginTop: -Spacing.xxl },
   appHeader: { flexDirection: 'row', marginBottom: Spacing.lg },
   logoImage: { width: 88, height: 88, borderRadius: 18, backgroundColor: Colors.surface },
@@ -294,45 +226,21 @@ const styles = StyleSheet.create({
   appVersion: { color: Colors.textSecondary, fontSize: 13, marginBottom: Spacing.xs },
   categoryBadge: { alignSelf: 'flex-start', backgroundColor: Colors.primary + '25', paddingHorizontal: Spacing.sm, paddingVertical: 3, borderRadius: BorderRadius.sm },
   categoryText: { color: Colors.primaryLight, fontSize: 11, fontWeight: '500' },
-
-  // Download
   downloadButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: Colors.primary, paddingVertical: Spacing.md, borderRadius: BorderRadius.md, marginBottom: Spacing.lg, gap: Spacing.sm },
   downloadButtonText: { color: Colors.text, fontSize: 16, fontWeight: '700' },
-  installButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: Colors.accent, paddingVertical: Spacing.md, borderRadius: BorderRadius.md, marginBottom: Spacing.lg, gap: Spacing.sm },
-  installButtonText: { color: Colors.text, fontSize: 16, fontWeight: '700' },
-  progressContainer: { flexDirection: 'row', alignItems: 'center', backgroundColor: Colors.backgroundCard, paddingVertical: Spacing.md, paddingHorizontal: Spacing.lg, borderRadius: BorderRadius.md, marginBottom: Spacing.lg, borderWidth: 1, borderColor: Colors.border, gap: Spacing.md },
-  progressBar: { flex: 1, height: 8, backgroundColor: Colors.surface, borderRadius: 4, overflow: 'hidden' },
-  progressFill: { height: '100%', backgroundColor: Colors.primary, borderRadius: 4 },
-  progressText: { color: Colors.text, fontSize: 14, fontWeight: '600', minWidth: 90, textAlign: 'right' },
-
-  // Description
   descSection: { marginBottom: Spacing.lg },
   descTitle: { color: Colors.text, fontSize: 16, fontWeight: 'bold', marginBottom: Spacing.sm },
   descText: { color: Colors.textSecondary, fontSize: 14, lineHeight: 22 },
-
-  // Screenshots
   screenshotsSection: { marginBottom: Spacing.lg },
   screenshotsList: { paddingBottom: Spacing.xs },
   screenshot: { width: SCREENSHOT_WIDTH, height: 200, borderRadius: BorderRadius.md, backgroundColor: Colors.surface, marginRight: Spacing.sm },
-
-  // Info Cards
   infoCards: { flexDirection: 'row', gap: Spacing.sm },
   infoCard: { flex: 1, backgroundColor: Colors.backgroundCard, borderRadius: BorderRadius.md, padding: Spacing.md, alignItems: 'center', borderWidth: 1, borderColor: Colors.border },
   infoLabel: { color: Colors.textMuted, fontSize: 11, marginTop: Spacing.xs },
   infoValue: { color: Colors.text, fontSize: 13, fontWeight: '600', marginTop: 2 },
-
-  // Bottom Bar
   bottomBar: { position: 'absolute', bottom: 0, left: 0, right: 0, padding: Spacing.md, paddingBottom: Spacing.xl, backgroundColor: Colors.backgroundLight, borderTopWidth: 1, borderTopColor: Colors.border },
   bottomDownloadBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: Colors.primary, paddingVertical: Spacing.md, borderRadius: BorderRadius.md, gap: Spacing.sm },
   bottomDownloadText: { color: Colors.text, fontSize: 16, fontWeight: '700' },
-  bottomInstallBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: Colors.accent, paddingVertical: Spacing.md, borderRadius: BorderRadius.md, gap: Spacing.sm },
-  bottomInstallText: { color: Colors.text, fontSize: 16, fontWeight: '700' },
-  bottomProgress: { flexDirection: 'row', alignItems: 'center', paddingVertical: Spacing.md, gap: Spacing.md },
-  progressBar: { flex: 1, height: 8, backgroundColor: Colors.surface, borderRadius: 4, overflow: 'hidden' },
-  progressFill: { height: '100%', backgroundColor: Colors.primary, borderRadius: 4 },
-  progressText: { color: Colors.text, fontSize: 14, fontWeight: '600', minWidth: 50, textAlign: 'right' },
-
-  // Modal
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'center', alignItems: 'center', padding: Spacing.xl },
   modalCard: { backgroundColor: Colors.backgroundLight, borderRadius: BorderRadius.xl, padding: Spacing.lg, width: '100%', maxWidth: 360, alignItems: 'center', borderWidth: 1, borderColor: Colors.border },
   modalTitle: { color: Colors.text, fontSize: 18, fontWeight: 'bold', marginTop: Spacing.sm, marginBottom: Spacing.sm, textAlign: 'center' },

@@ -11,27 +11,19 @@ import { UpdateModal } from './src/components/UpdateModal';
 import { checkForUpdate, UpdateInfo } from './src/services/versionCheck';
 
 type Tab = 'home' | 'settings';
-type Screen = 'main' | 'AppDetail';
-
-interface HistoryEntry {
-  screen: Screen;
-  tab: Tab;
-  params?: any;
-}
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<Tab>('home');
-  const [screen, setScreen] = useState<Screen>('main');
-  const [screenParams, setScreenParams] = useState<any>(null);
+  const [showDetail, setShowDetail] = useState(false);
+  const [detailAppId, setDetailAppId] = useState<string | null>(null);
   const [showProfile, setShowProfile] = useState(false);
   const [updateInfo, setUpdateInfo] = useState<UpdateInfo | null>(null);
   const [showUpdate, setShowUpdate] = useState(false);
-  const [homeResetKey, setHomeResetKey] = useState(0);
+  const [showSettings, setShowSettings] = useState(false);
 
-  const historyRef = useRef<HistoryEntry[]>([]);
   const lastBackPress = useRef<number>(0);
 
-  // Check for updates on app start
+  // Check for updates once on app start
   useEffect(() => {
     const timer = setTimeout(async () => {
       const info = await checkForUpdate();
@@ -43,125 +35,84 @@ export default function App() {
     return () => clearTimeout(timer);
   }, []);
 
-  const pushHistory = useCallback(() => {
-    historyRef.current.push({ screen, tab: activeTab, params: screenParams });
-    if (historyRef.current.length > 20) {
-      historyRef.current = historyRef.current.slice(-20);
-    }
-  }, [screen, activeTab, screenParams]);
-
   const navigation = {
     navigate: (s: string, params?: any) => {
-      pushHistory();
-      if (s === 'AppDetail') {
-        setScreen('AppDetail');
-        setScreenParams(params);
+      if (s === 'AppDetail' && params?.appId) {
+        setDetailAppId(params.appId);
+        setShowDetail(true);
       } else if (s === 'ProfileModal') {
         setShowProfile(true);
       }
     },
     goBack: () => {
-      const prev = historyRef.current.pop();
-      if (prev) {
-        setScreen(prev.screen);
-        setActiveTab(prev.tab);
-        setScreenParams({ ...prev.params, returning: true });
-      } else {
-        setScreen('main');
-        setScreenParams({ returning: true });
-      }
+      setShowDetail(false);
+      setDetailAppId(null);
     },
-    params: screenParams,
-    tabNavigate: (tab: Tab) => {
-      pushHistory();
-      setActiveTab(tab);
-      setScreen('main');
-      setScreenParams(null);
-      if (tab === 'home') {
-        setHomeResetKey(prev => prev + 1);
-      }
+    params: null,
+    tabNavigate: (tab: string) => {
+      setActiveTab(tab as Tab);
+      setShowDetail(false);
+      setDetailAppId(null);
+      setShowSettings(tab === 'settings');
     },
   };
 
   // Back handler
   useEffect(() => {
     const handler = BackHandler.addEventListener('hardwareBackPress', () => {
-      if (showUpdate) {
-        setShowUpdate(false);
-        return true;
-      }
-
-      if (showProfile) {
-        setShowProfile(false);
-        return true;
-      }
-
-      if (screen === 'AppDetail') {
-        navigation.goBack();
-        return true;
-      }
-
-      if (activeTab === 'settings') {
-        navigation.tabNavigate('home');
-        return true;
-      }
+      if (showUpdate) { setShowUpdate(false); return true; }
+      if (showProfile) { setShowProfile(false); return true; }
+      if (showDetail) { setShowDetail(false); setDetailAppId(null); return true; }
+      if (showSettings) { setShowSettings(false); setActiveTab('home'); return true; }
 
       const now = Date.now();
       if (now - lastBackPress.current < 2000) {
         BackHandler.exitApp();
         return true;
-      } else {
-        lastBackPress.current = now;
-        if (Platform.OS === 'android') {
-          ToastAndroid.show('Pressione novamente para sair', ToastAndroid.SHORT);
-        }
-        return true;
       }
+      lastBackPress.current = now;
+      if (Platform.OS === 'android') {
+        ToastAndroid.show('Pressione novamente para sair', ToastAndroid.SHORT);
+      }
+      return true;
     });
-
     return () => handler.remove();
-  }, [screen, activeTab, showProfile, showUpdate]);
-
-  const renderScreen = () => {
-    if (screen === 'AppDetail') {
-      return (
-        <AppDetailScreen
-          navigation={navigation}
-          route={{ params: screenParams }}
-        />
-      );
-    }
-
-    if (activeTab === 'settings') {
-      return <SettingsScreen navigation={navigation} />;
-    }
-
-    return <HomeScreen navigation={navigation} resetKey={homeResetKey} />;
-  };
+  }, [showDetail, showProfile, showUpdate, showSettings]);
 
   return (
     <View style={{ flex: 1, backgroundColor: Colors.background }}>
       <StatusBar style="light" backgroundColor={Colors.background} />
-      {renderScreen()}
 
-      {screen === 'main' && (
-        <BottomNav
-          activeTab={activeTab}
-          onTabPress={(tab) => navigation.tabNavigate(tab as Tab)}
+      {/* Home - ALWAYS mounted, never remounted */}
+      {!showSettings && (
+        <HomeScreen
+          navigation={navigation}
+          style={{ display: showDetail ? 'none' : 'flex' }}
         />
       )}
 
-      <ProfileModal
-        visible={showProfile}
-        onClose={() => setShowProfile(false)}
-        onSave={() => {}}
-      />
+      {/* Settings - mounted when tab active */}
+      {showSettings && <SettingsScreen navigation={navigation} />}
 
-      <UpdateModal
-        visible={showUpdate}
-        updateInfo={updateInfo}
-        onDismiss={() => setShowUpdate(false)}
-      />
+      {/* Detail - mounted on top when needed */}
+      {showDetail && detailAppId && (
+        <AppDetailScreen
+          navigation={navigation}
+          route={{ params: { appId: detailAppId } }}
+        />
+      )}
+
+      {/* Bottom Nav */}
+      {!showDetail && (
+        <BottomNav
+          activeTab={activeTab}
+          onTabPress={(tab) => navigation.tabNavigate(tab)}
+        />
+      )}
+
+      {/* Modals */}
+      <ProfileModal visible={showProfile} onClose={() => setShowProfile(false)} onSave={() => {}} />
+      <UpdateModal visible={showUpdate} updateInfo={updateInfo} onDismiss={() => setShowUpdate(false)} />
     </View>
   );
 }

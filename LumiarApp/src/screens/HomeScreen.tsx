@@ -24,6 +24,7 @@ import { getFeedSorted } from '../services/preferences';
 interface HomeScreenProps {
   navigation: any;
   resetKey?: number;
+  style?: any;
 }
 
 function isValidUrl(uri: string): boolean {
@@ -43,7 +44,7 @@ function isLandscape(): boolean {
 
 const PAGE_SIZE = 15;
 
-export function HomeScreen({ navigation, resetKey }: HomeScreenProps) {
+export function HomeScreen({ navigation, resetKey, style }: HomeScreenProps) {
   const [apps, setApps] = useState<AppData[]>([]);
   const [categories, setCategories] = useState<CategoryData[]>([]);
   const [loading, setLoading] = useState(true);
@@ -339,7 +340,7 @@ export function HomeScreen({ navigation, resetKey }: HomeScreenProps) {
 
   // Portrait render
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, style]}>
       <ScrollView
         ref={scrollRef}
         style={styles.scrollView}
