@@ -83,6 +83,12 @@
       "slug": "financas",
       "icon": "💰",
       "color": "#59de4f"
+    },
+    {
+      "nome": "Saúde & Bem-Estar",
+      "slug": "saude",
+      "icon": "❤️",
+      "color": "#ff0000"
     }
   ],
   "subcategories": [
@@ -425,6 +431,31 @@
       "nome": "Calculadoras & Conversores",
       "slug": "calculadoras-financeiras",
       "parent": "Finanças & Gestão"
+    },
+    {
+      "nome": "Fitness, Treino & Exercícios",
+      "slug": "fitness-treino",
+      "parent": "Saúde & Bem-Estar"
+    },
+    {
+      "nome": "Alimentação, Dieta & Jejum",
+      "slug": "alimentacao-dieta",
+      "parent": "Saúde & Bem-Estar"
+    },
+    {
+      "nome": "Saúde Mental, Sono & Meditação",
+      "slug": "saude-mental-meditacao",
+      "parent": "Saúde & Bem-Estar"
+    },
+    {
+      "nome": "Monitoramento & Remédios",
+      "slug": "monitoramento-remedios",
+      "parent": "Saúde & Bem-Estar"
+    },
+    {
+      "nome": "Utilidades Médicas & Exames",
+      "slug": "utilidades-medicas",
+      "parent": "Saúde & Bem-Estar"
     }
   ]
 }
