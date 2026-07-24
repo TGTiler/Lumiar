@@ -11,7 +11,6 @@ import {
   Linking,
   Dimensions,
   Modal,
-  Animated,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Spacing, BorderRadius } from '../constants/theme';
@@ -21,6 +20,7 @@ import { trackView, trackDownload } from '../services/preferences';
 import { downloadManager, DownloadState } from '../services/downloadManager';
 
 const { width } = Dimensions.get('window');
+const SCREENSHOT_WIDTH = width * 0.65;
 
 function getInitial(name: string): string {
   return (name || '?').charAt(0).toUpperCase();
@@ -32,18 +32,24 @@ function isValidUrl(uri: string): boolean {
   return uri.startsWith('http://') || uri.startsWith('https://');
 }
 
-function DetailBanner({ uri, name }: { uri: string; name: string }) {
+function AppBanner({ uri, name }: { uri: string; name: string }) {
+  const [hasError, setHasError] = React.useState(false);
+  if (hasError || !isValidUrl(uri)) {
+    return <View style={styles.fallbackBanner}><Text style={styles.fallbackBannerText}>{getInitial(name)}</Text></View>;
+  }
+  return <Image source={{ uri }} style={styles.bannerImage} resizeMode="cover" onError={() => setHasError(true)} />;
+}
+
+function AppLogoSmall({ uri, name }: { uri: string; name: string }) {
   const [hasError, setHasError] = React.useState(false);
   if (hasError || !isValidUrl(uri)) {
     return (
-      <View style={styles.fallbackBanner}>
-        <Text style={styles.fallbackBannerText}>{getInitial(name)}</Text>
+      <View style={styles.logoFallback}>
+        <Text style={styles.logoFallbackText}>{getInitial(name)}</Text>
       </View>
     );
   }
-  return (
-    <Image source={{ uri }} style={styles.headerImage} resizeMode="cover" onError={() => setHasError(true)} />
-  );
+  return <Image source={{ uri }} style={styles.logoImage} resizeMode="cover" onError={() => setHasError(true)} />;
 }
 
 interface AppDetailScreenProps {
@@ -69,9 +75,7 @@ export function AppDetailScreen({ route, navigation }: AppDetailScreenProps) {
     try {
       const appData = await api.getAppById(appId);
       setApp(appData || null);
-      if (appData) {
-        trackView(appData.SubcategoriaSlug || '');
-      }
+      if (appData) trackView(appData.SubcategoriaSlug || '');
     } catch (error) {
       console.error('Error loading app:', error);
     } finally {
@@ -79,11 +83,8 @@ export function AppDetailScreen({ route, navigation }: AppDetailScreenProps) {
     }
   };
 
-  const handleDownload = async () => {
-    if (!app?.url_apk) {
-      Alert.alert('Erro', 'URL de download não disponível');
-      return;
-    }
+  const handleDownload = () => {
+    if (!app?.url_apk) { Alert.alert('Erro', 'URL de download não disponível'); return; }
     setShowWarning(true);
   };
 
@@ -102,11 +103,7 @@ export function AppDetailScreen({ route, navigation }: AppDetailScreenProps) {
   const progressPercent = Math.round(downloadState.progress * 100);
 
   if (loading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={Colors.primary} />
-      </View>
-    );
+    return <View style={styles.loadingContainer}><ActivityIndicator size="large" color={Colors.primary} /></View>;
   }
 
   if (!app) {
@@ -129,7 +126,7 @@ export function AppDetailScreen({ route, navigation }: AppDetailScreenProps) {
             <View style={styles.progressBar}>
               <View style={[styles.progressFill, { width: `${progressPercent}%` }]} />
             </View>
-            <Text style={styles.progressText}>{progressPercent}%</Text>
+            <Text style={styles.progressText}>Baixando... {progressPercent}%</Text>
           </View>
         );
       case 'completed':
@@ -159,8 +156,9 @@ export function AppDetailScreen({ route, navigation }: AppDetailScreenProps) {
   return (
     <View style={styles.container}>
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
+        {/* Banner */}
         <View style={styles.bannerContainer}>
-          <DetailBanner uri={app.img1} name={app.NomeAPP} />
+          <AppBanner uri={app.img1} name={app.NomeAPP} />
           <View style={styles.bannerOverlay} />
           <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
             <Ionicons name="arrow-back" size={22} color={Colors.text} />
@@ -168,8 +166,9 @@ export function AppDetailScreen({ route, navigation }: AppDetailScreenProps) {
         </View>
 
         <View style={styles.appInfo}>
+          {/* Logo + Title */}
           <View style={styles.appHeader}>
-            <DetailBanner uri={app.logo} name={app.NomeAPP} />
+            <AppLogoSmall uri={app.logo} name={app.NomeAPP} />
             <View style={styles.appTitle}>
               <Text style={styles.appName}>{app.NomeAPP}</Text>
               <Text style={styles.appVersion}>v{app.Versao}</Text>
@@ -179,15 +178,16 @@ export function AppDetailScreen({ route, navigation }: AppDetailScreenProps) {
             </View>
           </View>
 
+          {/* Download Button / Progress */}
           {renderDownloadButton()}
 
+          {/* Description */}
           <View style={styles.descSection}>
             <Text style={styles.descTitle}>Sobre este app</Text>
-            <Text style={styles.descText}>
-              {app.Descricao || app.descricao || 'Sem descrição disponível.'}
-            </Text>
+            <Text style={styles.descText}>{app.Descricao || app.descricao || 'Sem descrição disponível.'}</Text>
           </View>
 
+          {/* Screenshots */}
           {(isValidUrl(app.img1) || isValidUrl(app.img2)) && (
             <View style={styles.screenshotsSection}>
               <Text style={styles.descTitle}>Screenshots</Text>
@@ -206,6 +206,7 @@ export function AppDetailScreen({ route, navigation }: AppDetailScreenProps) {
             </View>
           )}
 
+          {/* Info Cards */}
           <View style={styles.infoCards}>
             <View style={styles.infoCard}>
               <Ionicons name="cube-outline" size={20} color={Colors.primary} />
@@ -221,6 +222,7 @@ export function AppDetailScreen({ route, navigation }: AppDetailScreenProps) {
         </View>
       </ScrollView>
 
+      {/* Bottom Bar */}
       <View style={styles.bottomBar}>
         {downloadState.status === 'idle' ? (
           <TouchableOpacity style={styles.bottomDownloadBtn} onPress={handleDownload}>
@@ -263,8 +265,6 @@ export function AppDetailScreen({ route, navigation }: AppDetailScreenProps) {
   );
 }
 
-const SCREENSHOT_WIDTH = width * 0.65;
-
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.background },
   loadingContainer: { flex: 1, backgroundColor: Colors.background, justifyContent: 'center', alignItems: 'center' },
@@ -274,19 +274,28 @@ const styles = StyleSheet.create({
   backHomeText: { color: Colors.text, fontSize: 16, fontWeight: '600' },
   scroll: { flex: 1 },
   scrollContent: { paddingBottom: 100 },
+
+  // Banner
   bannerContainer: { width, height: 220, position: 'relative' },
-  headerImage: { width: '100%', height: '100%' },
+  bannerImage: { width: '100%', height: '100%' },
   fallbackBanner: { width: '100%', height: '100%', backgroundColor: Colors.primary, justifyContent: 'center', alignItems: 'center' },
   fallbackBannerText: { color: Colors.text, fontSize: 64, fontWeight: 'bold', opacity: 0.3 },
   bannerOverlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.3)' },
   backBtn: { position: 'absolute', top: Spacing.xl, left: Spacing.md, width: 36, height: 36, borderRadius: 18, backgroundColor: Colors.overlay, justifyContent: 'center', alignItems: 'center' },
+
+  // App Info
   appInfo: { padding: Spacing.lg, marginTop: -Spacing.xxl },
   appHeader: { flexDirection: 'row', marginBottom: Spacing.lg },
-  appTitle: { marginLeft: Spacing.md, flex: 1 },
+  logoImage: { width: 88, height: 88, borderRadius: 18, backgroundColor: Colors.surface },
+  logoFallback: { width: 88, height: 88, borderRadius: 18, backgroundColor: Colors.primary, justifyContent: 'center', alignItems: 'center' },
+  logoFallbackText: { color: Colors.text, fontSize: 32, fontWeight: 'bold' },
+  appTitle: { marginLeft: Spacing.md, flex: 1, justifyContent: 'center' },
   appName: { color: Colors.text, fontSize: 22, fontWeight: 'bold', marginBottom: 2 },
   appVersion: { color: Colors.textSecondary, fontSize: 13, marginBottom: Spacing.xs },
   categoryBadge: { alignSelf: 'flex-start', backgroundColor: Colors.primary + '25', paddingHorizontal: Spacing.sm, paddingVertical: 3, borderRadius: BorderRadius.sm },
   categoryText: { color: Colors.primaryLight, fontSize: 11, fontWeight: '500' },
+
+  // Download
   downloadButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: Colors.primary, paddingVertical: Spacing.md, borderRadius: BorderRadius.md, marginBottom: Spacing.lg, gap: Spacing.sm },
   downloadButtonText: { color: Colors.text, fontSize: 16, fontWeight: '700' },
   installButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: Colors.accent, paddingVertical: Spacing.md, borderRadius: BorderRadius.md, marginBottom: Spacing.lg, gap: Spacing.sm },
@@ -294,26 +303,36 @@ const styles = StyleSheet.create({
   progressContainer: { flexDirection: 'row', alignItems: 'center', backgroundColor: Colors.backgroundCard, paddingVertical: Spacing.md, paddingHorizontal: Spacing.lg, borderRadius: BorderRadius.md, marginBottom: Spacing.lg, borderWidth: 1, borderColor: Colors.border, gap: Spacing.md },
   progressBar: { flex: 1, height: 8, backgroundColor: Colors.surface, borderRadius: 4, overflow: 'hidden' },
   progressFill: { height: '100%', backgroundColor: Colors.primary, borderRadius: 4 },
-  progressText: { color: Colors.text, fontSize: 14, fontWeight: '600', minWidth: 40, textAlign: 'right' },
+  progressText: { color: Colors.text, fontSize: 14, fontWeight: '600', minWidth: 90, textAlign: 'right' },
+
+  // Description
   descSection: { marginBottom: Spacing.lg },
   descTitle: { color: Colors.text, fontSize: 16, fontWeight: 'bold', marginBottom: Spacing.sm },
   descText: { color: Colors.textSecondary, fontSize: 14, lineHeight: 22 },
+
+  // Screenshots
   screenshotsSection: { marginBottom: Spacing.lg },
   screenshotsList: { paddingBottom: Spacing.xs },
   screenshot: { width: SCREENSHOT_WIDTH, height: 200, borderRadius: BorderRadius.md, backgroundColor: Colors.surface, marginRight: Spacing.sm },
+
+  // Info Cards
   infoCards: { flexDirection: 'row', gap: Spacing.sm },
   infoCard: { flex: 1, backgroundColor: Colors.backgroundCard, borderRadius: BorderRadius.md, padding: Spacing.md, alignItems: 'center', borderWidth: 1, borderColor: Colors.border },
   infoLabel: { color: Colors.textMuted, fontSize: 11, marginTop: Spacing.xs },
   infoValue: { color: Colors.text, fontSize: 13, fontWeight: '600', marginTop: 2 },
+
+  // Bottom Bar
   bottomBar: { position: 'absolute', bottom: 0, left: 0, right: 0, padding: Spacing.md, paddingBottom: Spacing.xl, backgroundColor: Colors.backgroundLight, borderTopWidth: 1, borderTopColor: Colors.border },
   bottomDownloadBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: Colors.primary, paddingVertical: Spacing.md, borderRadius: BorderRadius.md, gap: Spacing.sm },
   bottomDownloadText: { color: Colors.text, fontSize: 16, fontWeight: '700' },
   bottomInstallBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: Colors.accent, paddingVertical: Spacing.md, borderRadius: BorderRadius.md, gap: Spacing.sm },
   bottomInstallText: { color: Colors.text, fontSize: 16, fontWeight: '700' },
-  bottomProgress: { flexDirection: 'row', alignItems: 'center', gap: Spacing.md },
+  bottomProgress: { flexDirection: 'row', alignItems: 'center', paddingVertical: Spacing.md, gap: Spacing.md },
   progressBar: { flex: 1, height: 8, backgroundColor: Colors.surface, borderRadius: 4, overflow: 'hidden' },
   progressFill: { height: '100%', backgroundColor: Colors.primary, borderRadius: 4 },
-  progressText: { color: Colors.text, fontSize: 14, fontWeight: '600', minWidth: 40, textAlign: 'right' },
+  progressText: { color: Colors.text, fontSize: 14, fontWeight: '600', minWidth: 50, textAlign: 'right' },
+
+  // Modal
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'center', alignItems: 'center', padding: Spacing.xl },
   modalCard: { backgroundColor: Colors.backgroundLight, borderRadius: BorderRadius.xl, padding: Spacing.lg, width: '100%', maxWidth: 360, alignItems: 'center', borderWidth: 1, borderColor: Colors.border },
   modalTitle: { color: Colors.text, fontSize: 18, fontWeight: 'bold', marginTop: Spacing.sm, marginBottom: Spacing.sm, textAlign: 'center' },
