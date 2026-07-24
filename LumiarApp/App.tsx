@@ -65,10 +65,10 @@ export default function App() {
       if (prev) {
         setScreen(prev.screen);
         setActiveTab(prev.tab);
-        setScreenParams(prev.params);
+        setScreenParams({ ...prev.params, returning: true });
       } else {
         setScreen('main');
-        setScreenParams(null);
+        setScreenParams({ returning: true });
       }
     },
     params: screenParams,

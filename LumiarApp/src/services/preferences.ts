@@ -4,39 +4,46 @@ const PREFS_KEY = '@lumiar_preferences';
 
 export interface UserPreferences {
   subcategoryWeights: Record<string, number>;
+  lastInteraction: number;
 }
+
+let cachedPrefs: UserPreferences | null = null;
 
 export async function loadPreferences(): Promise<UserPreferences> {
+  if (cachedPrefs) return cachedPrefs;
   try {
     const data = await AsyncStorage.getItem(PREFS_KEY);
-    if (data) return JSON.parse(data);
+    if (data) {
+      cachedPrefs = JSON.parse(data);
+      return cachedPrefs;
+    }
   } catch {}
-  return { subcategoryWeights: {} };
+  cachedPrefs = { subcategoryWeights: {}, lastInteraction: Date.now() };
+  return cachedPrefs;
 }
 
-export async function incrementPreference(subcategorySlug: string): Promise<void> {
-  try {
-    const prefs = await loadPreferences();
-    const current = prefs.subcategoryWeights[subcategorySlug] || 0;
-    prefs.subcategoryWeights[subcategorySlug] = current + 1;
-    await AsyncStorage.setItem(PREFS_KEY, JSON.stringify(prefs));
-  } catch {}
+export async function savePreferences(prefs: UserPreferences): Promise<void> {
+  cachedPrefs = prefs;
+  await AsyncStorage.setItem(PREFS_KEY, JSON.stringify(prefs));
+}
+
+export async function incrementPreference(subcategorySlug: string, weight: number = 1): Promise<void> {
+  if (!subcategorySlug) return;
+  const prefs = await loadPreferences();
+  const current = prefs.subcategoryWeights[subcategorySlug] || 0;
+  prefs.subcategoryWeights[subcategorySlug] = current + weight;
+  prefs.lastInteraction = Date.now();
+  await savePreferences(prefs);
 }
 
 export async function trackView(subcategorySlug: string): Promise<void> {
-  await incrementPreference(subcategorySlug);
+  await incrementPreference(subcategorySlug, 1);
 }
 
 export async function trackDownload(subcategorySlug: string): Promise<void> {
-  try {
-    const prefs = await loadPreferences();
-    const current = prefs.subcategoryWeights[subcategorySlug] || 0;
-    prefs.subcategoryWeights[subcategorySlug] = current + 3;
-    await AsyncStorage.setItem(PREFS_KEY, JSON.stringify(prefs));
-  } catch {}
+  await incrementPreference(subcategorySlug, 3);
 }
 
-// Fisher-Yates shuffle
 function shuffle<T>(array: T[]): T[] {
   const arr = [...array];
   for (let i = arr.length - 1; i > 0; i--) {
@@ -49,14 +56,10 @@ function shuffle<T>(array: T[]): T[] {
 export async function getFeedSorted(apps: any[]): Promise<any[]> {
   const prefs = await loadPreferences();
   const weights = prefs.subcategoryWeights;
-
-  // If no preferences, shuffle randomly
   const hasPrefs = Object.keys(weights).length > 0;
-  if (!hasPrefs) {
-    return shuffle(apps);
-  }
 
-  // Sort by subcategory weight, then shuffle within same weight
+  if (!hasPrefs) return shuffle(apps);
+
   const scored = apps.map(app => ({
     app,
     score: weights[app.SubcategoriaSlug || ''] || 0,
@@ -64,7 +67,6 @@ export async function getFeedSorted(apps: any[]): Promise<any[]> {
 
   scored.sort((a, b) => b.score - a.score);
 
-  // Mix: top weighted apps first, then randomize rest
   const topApps = scored.filter(s => s.score > 0);
   const unprefApps = shuffle(scored.filter(s => s.score === 0));
 

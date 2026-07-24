@@ -102,9 +102,9 @@ export function HomeScreen({ navigation, resetKey }: HomeScreenProps) {
     }
     // Restore scroll position when returning from detail
     if (navigation.params?.returning && savedScrollY.current > 0) {
-      setTimeout(() => {
+      requestAnimationFrame(() => {
         scrollRef.current?.scrollTo({ y: savedScrollY.current, animated: false });
-      }, 100);
+      });
     }
   }, [navigation.params]);
 
