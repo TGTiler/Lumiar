@@ -8,11 +8,12 @@ import {
   StyleSheet,
   ActivityIndicator,
   Alert,
-  Linking,
+  Linking as RNLinking,
   Dimensions,
   Modal,
   Share,
 } from 'react-native';
+import * as Linking from 'expo-linking';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Spacing, BorderRadius } from '../constants/theme';
 import { api, AppData } from '../services/api';
@@ -86,8 +87,8 @@ export function AppDetailScreen({ route, navigation }: AppDetailScreenProps) {
     if (!app?.url_apk) return;
     trackDownload(app.SubcategoriaSlug || '');
     try {
-      const supported = await Linking.canOpenURL(app.url_apk);
-      if (supported) await Linking.openURL(app.url_apk);
+      const supported = await RNLinking.canOpenURL(app.url_apk);
+      if (supported) await RNLinking.openURL(app.url_apk);
       else Alert.alert('Erro', 'Não foi possível abrir o link');
     } catch {
       Alert.alert('Erro', 'Falha ao iniciar download');
@@ -97,14 +98,16 @@ export function AppDetailScreen({ route, navigation }: AppDetailScreenProps) {
   const compartilharApp = async () => {
     if (!app) return;
     try {
-      const shareUrl = `https://lumiarstore.app/app/${app.ID}`;
+      const shareUrl = Linking.createURL(`app/${app.ID}`);
       await Share.share({
         title: app.NomeAPP,
-        message: `Confira o ${app.NomeAPP} na Lumiar Store!\n${shareUrl}`,
+        message: `Confira o app ${app.NomeAPP} na Lumiar Store!\nAbra no app: ${shareUrl}`,
         url: shareUrl,
       });
-    } catch (error) {
-      console.error('Erro ao compartilhar:', error);
+    } catch (error: any) {
+      if (error?.message !== 'User did not share') {
+        console.error('Erro ao compartilhar:', error);
+      }
     }
   };
 

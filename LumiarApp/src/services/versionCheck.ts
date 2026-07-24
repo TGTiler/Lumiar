@@ -1,8 +1,9 @@
 import { Platform } from 'react-native';
+import Constants from 'expo-constants';
 import * as Updates from 'expo-updates';
 import { api, VersionData } from './api';
 
-const CURRENT_VERSION = '1.2.4';
+const CURRENT_VERSION = Constants.expoConfig?.version || '1.0.0';
 
 export interface UpdateInfo {
   available: boolean;
