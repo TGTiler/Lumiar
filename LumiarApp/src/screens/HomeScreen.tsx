@@ -245,7 +245,7 @@ export function HomeScreen({ navigation, resetKey, style }: HomeScreenProps) {
   // Landscape render
   if (landscape) {
     return (
-      <View style={styles.landscapeContainer}>
+      <View style={[styles.landscapeContainer, style]}>
         <View style={styles.landscapeContent}>
           {/* Header */}
           <View style={styles.landscapeHeader}>
@@ -279,7 +279,11 @@ export function HomeScreen({ navigation, resetKey, style }: HomeScreenProps) {
 
           {/* Category Chips */}
           {!searchResults && (
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipsList}>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.landscapeChipsList}
+            >
               <TouchableOpacity
                 style={[styles.chip, !selectedCategory && styles.chipActive]}
                 onPress={() => setSelectedCategory(null)}
@@ -662,9 +666,16 @@ const styles = StyleSheet.create({
   searchInput: { flex: 1, height: 44, color: Colors.text, fontSize: 15, marginLeft: Spacing.sm },
   chipsSection: { paddingVertical: Spacing.sm },
   chipsList: { paddingHorizontal: Spacing.md, gap: Spacing.sm },
+  landscapeChipsList: {
+    paddingHorizontal: Spacing.md,
+    paddingVertical: 6,
+    gap: Spacing.sm,
+    alignItems: 'center',
+  },
   chip: {
     flexDirection: 'row', alignItems: 'center', backgroundColor: Colors.chipInactive,
-    borderRadius: BorderRadius.xl, paddingHorizontal: Spacing.md, paddingVertical: Spacing.sm,
+    borderRadius: 20, paddingHorizontal: 16, paddingVertical: 8,
+    minHeight: 36,
     borderWidth: 1, borderColor: Colors.chipBorder, gap: Spacing.xs,
   },
   chipActive: { backgroundColor: Colors.chipActive, borderColor: Colors.chipActive },

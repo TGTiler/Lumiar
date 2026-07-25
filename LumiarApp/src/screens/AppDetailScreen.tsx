@@ -20,8 +20,9 @@ import { api, AppData } from '../services/api';
 import { Lightbox } from '../components/Lightbox';
 import { trackView, trackDownload } from '../services/preferences';
 
-const { width } = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
 const SCREENSHOT_WIDTH = width * 0.65;
+const isLandscape = width > height;
 
 function getInitial(name: string): string {
   return (name || '?').charAt(0).toUpperCase();
@@ -131,7 +132,7 @@ export function AppDetailScreen({ route, navigation }: AppDetailScreenProps) {
     <View style={styles.container}>
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
         {/* Banner */}
-        <View style={styles.bannerContainer}>
+        <View style={[styles.bannerContainer, isLandscape && styles.bannerContainerLandscape]}>
           <AppBanner uri={app.img1} name={app.NomeAPP} />
           <View style={styles.bannerOverlay} />
           <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
@@ -142,9 +143,9 @@ export function AppDetailScreen({ route, navigation }: AppDetailScreenProps) {
           </TouchableOpacity>
         </View>
 
-        <View style={styles.appInfo}>
+        <View style={[styles.appInfo, isLandscape && styles.appInfoLandscape]}>
           {/* Logo + Title */}
-          <View style={styles.appHeader}>
+          <View style={[styles.appHeader, isLandscape && styles.appHeaderLandscape]}>
             <AppLogoSmall uri={app.logo} name={app.NomeAPP} />
             <View style={styles.appTitle}>
               <Text style={styles.appName}>{app.NomeAPP}</Text>
@@ -174,12 +175,12 @@ export function AppDetailScreen({ route, navigation }: AppDetailScreenProps) {
               <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.screenshotsList}>
                 {isValidUrl(app.img1) && (
                   <TouchableOpacity onPress={() => setLightboxUri(app.img1)}>
-                    <Image source={{ uri: app.img1 }} style={styles.screenshot} resizeMode="cover" />
+                    <Image source={{ uri: app.img1 }} style={[styles.screenshot, isLandscape && styles.screenshotLandscape]} resizeMode="cover" />
                   </TouchableOpacity>
                 )}
                 {isValidUrl(app.img2) && (
                   <TouchableOpacity onPress={() => setLightboxUri(app.img2)}>
-                    <Image source={{ uri: app.img2 }} style={styles.screenshot} resizeMode="cover" />
+                    <Image source={{ uri: app.img2 }} style={[styles.screenshot, isLandscape && styles.screenshotLandscape]} resizeMode="cover" />
                   </TouchableOpacity>
                 )}
               </ScrollView>
@@ -240,14 +241,17 @@ const styles = StyleSheet.create({
   scroll: { flex: 1 },
   scrollContent: { paddingBottom: 100 },
   bannerContainer: { width, height: 220, position: 'relative' },
+  bannerContainerLandscape: { height: 160 },
   bannerImage: { width: '100%', height: '100%' },
   fallbackBanner: { width: '100%', height: '100%', backgroundColor: Colors.primary, justifyContent: 'center', alignItems: 'center' },
   fallbackBannerText: { color: Colors.text, fontSize: 64, fontWeight: 'bold', opacity: 0.3 },
   bannerOverlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.3)' },
-  backBtn: { position: 'absolute', top: Spacing.xl, left: Spacing.md, width: 36, height: 36, borderRadius: 18, backgroundColor: Colors.overlay, justifyContent: 'center', alignItems: 'center' },
-  shareBtn: { position: 'absolute', top: Spacing.xl, right: Spacing.md, width: 36, height: 36, borderRadius: 18, backgroundColor: Colors.overlay, justifyContent: 'center', alignItems: 'center' },
+  backBtn: { position: 'absolute', top: Spacing.xl, left: Spacing.md, width: 36, height: 36, borderRadius: 18, backgroundColor: Colors.overlay, justifyContent: 'center', alignItems: 'center', zIndex: 10 },
+  shareBtn: { position: 'absolute', top: Spacing.xl, right: Spacing.md, width: 36, height: 36, borderRadius: 18, backgroundColor: Colors.overlay, justifyContent: 'center', alignItems: 'center', zIndex: 10 },
   appInfo: { padding: Spacing.lg, marginTop: -Spacing.xxl },
+  appInfoLandscape: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.md, marginTop: -Spacing.xl },
   appHeader: { flexDirection: 'row', marginBottom: Spacing.lg },
+  appHeaderLandscape: { flex: 1, minWidth: 280, marginBottom: 0 },
   logoImage: { width: 88, height: 88, borderRadius: 18, backgroundColor: Colors.surface },
   logoFallback: { width: 88, height: 88, borderRadius: 18, backgroundColor: Colors.primary, justifyContent: 'center', alignItems: 'center' },
   logoFallbackText: { color: Colors.text, fontSize: 32, fontWeight: 'bold' },
@@ -256,7 +260,7 @@ const styles = StyleSheet.create({
   appVersion: { color: Colors.textSecondary, fontSize: 13, marginBottom: Spacing.xs },
   categoryBadge: { alignSelf: 'flex-start', backgroundColor: Colors.primary + '25', paddingHorizontal: Spacing.sm, paddingVertical: 3, borderRadius: BorderRadius.sm },
   categoryText: { color: Colors.primaryLight, fontSize: 11, fontWeight: '500' },
-  downloadButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: Colors.primary, paddingVertical: Spacing.md, borderRadius: BorderRadius.md, marginBottom: Spacing.lg, gap: Spacing.sm },
+  downloadButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: Colors.primary, paddingVertical: Spacing.md, borderRadius: BorderRadius.md, marginBottom: Spacing.lg, marginVertical: 12, gap: Spacing.sm },
   downloadButtonText: { color: Colors.text, fontSize: 16, fontWeight: '700' },
   descSection: { marginBottom: Spacing.lg },
   descTitle: { color: Colors.text, fontSize: 16, fontWeight: 'bold', marginBottom: Spacing.sm },
@@ -264,6 +268,7 @@ const styles = StyleSheet.create({
   screenshotsSection: { marginBottom: Spacing.lg },
   screenshotsList: { paddingBottom: Spacing.xs },
   screenshot: { width: SCREENSHOT_WIDTH, height: 200, borderRadius: BorderRadius.md, backgroundColor: Colors.surface, marginRight: Spacing.sm },
+  screenshotLandscape: { width: SCREENSHOT_WIDTH * 0.8, height: 140 },
   infoCards: { flexDirection: 'row', gap: Spacing.sm },
   infoCard: { flex: 1, backgroundColor: Colors.backgroundCard, borderRadius: BorderRadius.md, padding: Spacing.md, alignItems: 'center', borderWidth: 1, borderColor: Colors.border },
   infoLabel: { color: Colors.textMuted, fontSize: 11, marginTop: Spacing.xs },
