@@ -19,7 +19,7 @@ import { Colors, Spacing, BorderRadius } from '../constants/theme';
 import { api, AppData, CategoryData } from '../services/api';
 import { FeaturedCard, AppListItem } from '../components/AppCard';
 import { AvatarIcon, loadProfile, UserProfile } from '../components/ProfileModal';
-import { getFeedSorted } from '../services/preferences';
+import { getFeedSorted, incrementPreference } from '../services/preferences';
 
 interface HomeScreenProps {
   navigation: any;
@@ -60,6 +60,7 @@ export function HomeScreen({ navigation, resetKey, style }: HomeScreenProps) {
   const headerHidden = useRef(false);
   const savedScrollY = useRef(0);
   const [landscape, setLandscape] = useState(isLandscape());
+  const [gamepadBoosted, setGamepadBoosted] = useState(false);
 
   // Pagination state
   const [displayedApps, setDisplayedApps] = useState<AppData[]>([]);
@@ -72,6 +73,45 @@ export function HomeScreen({ navigation, resetKey, style }: HomeScreenProps) {
     });
     return () => sub?.remove();
   }, []);
+
+  // Gamepad detection: boost "Jogos" category when gamepad is connected
+  useEffect(() => {
+    if (Platform.OS !== 'android') return;
+
+    let gamepadCheckInterval: ReturnType<typeof setInterval> | null = null;
+    let lastGamepadState = false;
+
+    const checkGamepad = () => {
+      try {
+        // React Native doesn't have native gamepad API on all devices
+        // Use device event emitter for gamepad connections if available
+        const EventEmitter = require('react-native').DeviceEventEmitter;
+        const subscription = EventEmitter.addListener('onKeyDown', (event: any) => {
+          if (!lastGamepadState) {
+            lastGamepadState = true;
+            if (!gamepadBoosted) {
+              setGamepadBoosted(true);
+              // Boost "jogos" subcategory in preferences
+              incrementPreference('jogos', 10);
+              // Auto-select "Jogos" category if available
+              setTimeout(() => {
+                setSelectedCategory('Jogos');
+              }, 500);
+            }
+          }
+        });
+        return () => subscription?.remove();
+      } catch {
+        // Gamepad API not available on this device, ignore
+      }
+    };
+
+    const cleanup = checkGamepad();
+    return () => {
+      cleanup?.();
+      if (gamepadCheckInterval) clearInterval(gamepadCheckInterval);
+    };
+  }, [gamepadBoosted]);
 
   const loadData = useCallback(async () => {
     try {
@@ -665,12 +705,13 @@ const styles = StyleSheet.create({
   landscapeFeaturedDesc: { color: Colors.textSecondary, fontSize: 12, marginTop: 2 },
   landscapeFeaturedVersion: { color: Colors.textMuted, fontSize: 11, marginTop: 4 },
   landscapeGrid: {
-    flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.md,
+    flexDirection: 'row', flexWrap: 'wrap',
   },
   landscapeGridCard: {
-    width: (Dimensions.get('window').width - 72 - Spacing.md * 5) / 4,
+    width: `${100 / 4}%` as any,
     backgroundColor: Colors.backgroundCard, borderRadius: BorderRadius.md,
     padding: Spacing.sm, alignItems: 'center', borderWidth: 1, borderColor: Colors.border,
+    marginBottom: Spacing.sm,
   },
   landscapeGridLogo: { width: 56, height: 56, borderRadius: BorderRadius.md, backgroundColor: Colors.surface, marginBottom: Spacing.xs },
   landscapeGridName: { color: Colors.text, fontSize: 12, fontWeight: '600', textAlign: 'center' },

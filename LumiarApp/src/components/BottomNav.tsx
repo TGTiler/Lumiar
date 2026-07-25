@@ -159,8 +159,9 @@ const styles = StyleSheet.create({
   sidebarInner: {
     flex: 1,
     alignItems: 'center',
+    justifyContent: 'space-around',
     paddingTop: Spacing.xxl + Spacing.md,
-    gap: Spacing.lg,
+    paddingBottom: Spacing.xxl,
   },
   sidebarLogo: {
     width: 44,

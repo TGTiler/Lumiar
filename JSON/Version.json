@@ -1,5 +1,5 @@
 {
-  "Versao": "1.2.5",
-  "Download": "https://github.com/TGTiler/Lumiar/releases/download/Lumiar/Lumiar-v1.2.5.apk",
-  "Changelog": "Compartilhamento de apps, Deep Linking (lumiarstore://), botao de compartilhar na tela de detalhes"
+  "Versao": "1.2.6",
+  "Download": "https://github.com/TGTiler/Lumiar/releases/download/Lumiar/Lumiar-v1.2.6.apk",
+  "Changelog": "Fix landscape layout, gamepad recommendation, fix share URL (lumiarstore://), fix update check"
 }
