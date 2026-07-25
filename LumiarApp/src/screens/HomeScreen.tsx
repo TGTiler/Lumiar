@@ -308,33 +308,49 @@ export function HomeScreen({ navigation, resetKey, style }: HomeScreenProps) {
             <ScrollView style={styles.landscapeScrollView}>
               {searchResults.length > 0 ? (
                 <>
-                  {/* Featured */}
-                  <TouchableOpacity
-                    style={styles.landscapeFeatured}
-                    onPress={() => navigateToApp(searchResults[0])}
-                    focusable={true}
-                  >
-                    <Image source={{ uri: searchResults[0].logo }} style={styles.landscapeFeaturedLogo} />
-                    <View style={styles.landscapeFeaturedInfo}>
-                      <Text style={styles.landscapeFeaturedName}>{searchResults[0].NomeAPP}</Text>
-                      <Text style={styles.landscapeFeaturedDesc} numberOfLines={1}>
-                        {searchResults[0].Descricao || searchResults[0].descricao || ''}
-                      </Text>
-                      <Text style={styles.landscapeFeaturedVersion}>v{searchResults[0].Versao}</Text>
-                    </View>
-                  </TouchableOpacity>
-                  {/* Grid */}
-                  <View style={styles.landscapeGrid}>
-                    {searchResults.slice(1).map((app) => (
+                  {/* Featured - 2 cards side by side */}
+                  <View style={styles.landscapeFeaturedRow}>
+                    {searchResults.slice(0, 2).map((app) => (
                       <TouchableOpacity
                         key={app.ID}
-                        style={styles.landscapeGridCard}
+                        style={styles.landscapeFeatured}
                         onPress={() => navigateToApp(app)}
                         focusable={true}
                       >
-                        <Image source={{ uri: app.logo }} style={styles.landscapeGridLogo} />
-                        <Text style={styles.landscapeGridName} numberOfLines={1}>{app.NomeAPP}</Text>
-                        <Text style={styles.landscapeGridVersion}>v{app.Versao}</Text>
+                        <Image source={{ uri: app.logo }} style={styles.landscapeFeaturedLogo} />
+                        <View style={styles.landscapeFeaturedInfo}>
+                          <Text style={styles.landscapeFeaturedName}>{app.NomeAPP}</Text>
+                          <Text style={styles.landscapeFeaturedDesc} numberOfLines={1}>
+                            {app.Descricao || app.descricao || ''}
+                          </Text>
+                          <Text style={styles.landscapeFeaturedVersion}>v{app.Versao}</Text>
+                        </View>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                  {/* Grid - 2 columns horizontal cards */}
+                  <View style={styles.landscapeGrid}>
+                    {searchResults.slice(2).map((app) => (
+                      <TouchableOpacity
+                        key={app.ID}
+                        style={styles.landscapeHorizontalCard}
+                        onPress={() => navigateToApp(app)}
+                        focusable={true}
+                      >
+                        <Image source={{ uri: app.logo }} style={styles.landscapeCardLogo} />
+                        <View style={styles.landscapeCardInfo}>
+                          <Text style={styles.landscapeCardName} numberOfLines={1}>{app.NomeAPP}</Text>
+                          <Text style={styles.landscapeCardDesc} numberOfLines={1}>
+                            {app.Descricao || app.descricao || ''}
+                          </Text>
+                          <View style={styles.landscapeCardMeta}>
+                            <Text style={styles.landscapeCardVersion}>v{app.Versao}</Text>
+                            <View style={styles.landscapeCardBadge}>
+                              <Text style={styles.landscapeCardBadgeText}>{app.categoria}</Text>
+                            </View>
+                          </View>
+                        </View>
+                        <Ionicons name="chevron-forward" size={16} color={Colors.textMuted} />
                       </TouchableOpacity>
                     ))}
                   </View>
@@ -350,8 +366,9 @@ export function HomeScreen({ navigation, resetKey, style }: HomeScreenProps) {
             <FlatList
               data={filteredApps}
               keyExtractor={(item) => item.ID}
-              numColumns={landscape ? 4 : undefined}
-              contentContainerStyle={styles.landscapeGrid}
+              numColumns={2}
+              columnWrapperStyle={styles.landscapeGrid}
+              contentContainerStyle={styles.landscapeGridContent}
               showsVerticalScrollIndicator={false}
               initialNumToRender={10}
               maxToRenderPerBatch={8}
@@ -362,13 +379,24 @@ export function HomeScreen({ navigation, resetKey, style }: HomeScreenProps) {
               ListFooterComponent={loadingMore ? <ActivityIndicator color={Colors.primary} style={{ padding: 16 }} /> : null}
               renderItem={({ item }) => (
                 <TouchableOpacity
-                  style={styles.landscapeGridCard}
+                  style={styles.landscapeHorizontalCard}
                   onPress={() => navigateToApp(item)}
                   focusable={true}
                 >
-                  <Image source={{ uri: item.logo }} style={styles.landscapeGridLogo} />
-                  <Text style={styles.landscapeGridName} numberOfLines={1}>{item.NomeAPP}</Text>
-                  <Text style={styles.landscapeGridVersion}>v{item.Versao}</Text>
+                  <Image source={{ uri: item.logo }} style={styles.landscapeCardLogo} />
+                  <View style={styles.landscapeCardInfo}>
+                    <Text style={styles.landscapeCardName} numberOfLines={1}>{item.NomeAPP}</Text>
+                    <Text style={styles.landscapeCardDesc} numberOfLines={1}>
+                      {item.Descricao || item.descricao || ''}
+                    </Text>
+                    <View style={styles.landscapeCardMeta}>
+                      <Text style={styles.landscapeCardVersion}>v{item.Versao}</Text>
+                      <View style={styles.landscapeCardBadge}>
+                        <Text style={styles.landscapeCardBadgeText}>{item.categoria}</Text>
+                      </View>
+                    </View>
+                  </View>
+                  <Ionicons name="chevron-forward" size={16} color={Colors.textMuted} />
                 </TouchableOpacity>
               )}
             />
@@ -687,33 +715,44 @@ const styles = StyleSheet.create({
   otherResults: { marginTop: Spacing.sm },
 
   // Landscape
-  landscapeContainer: { flex: 1, backgroundColor: Colors.background, flexDirection: 'row' },
-  landscapeContent: { flex: 1, paddingLeft: 72 + Spacing.md, padding: Spacing.md },
+  landscapeContainer: { flex: 1, backgroundColor: Colors.background },
+  landscapeContent: { flex: 1, padding: Spacing.md, paddingBottom: 60 },
   landscapeHeader: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
-    marginBottom: Spacing.md, paddingTop: Spacing.sm,
+    marginBottom: Spacing.sm, paddingTop: Spacing.xs,
   },
   landscapeScrollView: { flex: 1 },
+  landscapeFeaturedRow: {
+    flexDirection: 'row', gap: Spacing.sm, marginBottom: Spacing.md,
+  },
   landscapeFeatured: {
-    flexDirection: 'row', backgroundColor: Colors.backgroundCard,
-    borderRadius: BorderRadius.lg, padding: Spacing.md, marginBottom: Spacing.md,
+    flex: 1, flexDirection: 'row', backgroundColor: Colors.backgroundCard,
+    borderRadius: BorderRadius.md, padding: Spacing.sm, alignItems: 'center',
     borderWidth: 1, borderColor: Colors.primary + '40',
   },
-  landscapeFeaturedLogo: { width: 64, height: 64, borderRadius: BorderRadius.md, backgroundColor: Colors.surface },
-  landscapeFeaturedInfo: { flex: 1, marginLeft: Spacing.md, justifyContent: 'center' },
-  landscapeFeaturedName: { color: Colors.text, fontSize: 16, fontWeight: 'bold' },
-  landscapeFeaturedDesc: { color: Colors.textSecondary, fontSize: 12, marginTop: 2 },
-  landscapeFeaturedVersion: { color: Colors.textMuted, fontSize: 11, marginTop: 4 },
+  landscapeFeaturedLogo: { width: 48, height: 48, borderRadius: BorderRadius.sm, backgroundColor: Colors.surface },
+  landscapeFeaturedInfo: { flex: 1, marginLeft: Spacing.sm, justifyContent: 'center' },
+  landscapeFeaturedName: { color: Colors.text, fontSize: 13, fontWeight: 'bold' },
+  landscapeFeaturedDesc: { color: Colors.textSecondary, fontSize: 11, marginTop: 1 },
+  landscapeFeaturedVersion: { color: Colors.textMuted, fontSize: 10, marginTop: 2 },
   landscapeGrid: {
-    flexDirection: 'row', flexWrap: 'wrap',
+    flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm,
   },
-  landscapeGridCard: {
-    width: `${100 / 4}%` as any,
+  landscapeGridContent: {
+    paddingBottom: 80,
+  },
+  landscapeHorizontalCard: {
+    width: '48%',
+    flexDirection: 'row', alignItems: 'center',
     backgroundColor: Colors.backgroundCard, borderRadius: BorderRadius.md,
-    padding: Spacing.sm, alignItems: 'center', borderWidth: 1, borderColor: Colors.border,
-    marginBottom: Spacing.sm,
+    padding: Spacing.sm, borderWidth: 1, borderColor: Colors.border,
   },
-  landscapeGridLogo: { width: 56, height: 56, borderRadius: BorderRadius.md, backgroundColor: Colors.surface, marginBottom: Spacing.xs },
-  landscapeGridName: { color: Colors.text, fontSize: 12, fontWeight: '600', textAlign: 'center' },
-  landscapeGridVersion: { color: Colors.textMuted, fontSize: 10 },
+  landscapeCardLogo: { width: 44, height: 44, borderRadius: BorderRadius.sm, backgroundColor: Colors.surface },
+  landscapeCardInfo: { flex: 1, marginLeft: Spacing.sm },
+  landscapeCardName: { color: Colors.text, fontSize: 13, fontWeight: '600' },
+  landscapeCardDesc: { color: Colors.textSecondary, fontSize: 11, marginTop: 1 },
+  landscapeCardMeta: { flexDirection: 'row', alignItems: 'center', gap: Spacing.xs, marginTop: 3 },
+  landscapeCardVersion: { color: Colors.textMuted, fontSize: 10 },
+  landscapeCardBadge: { backgroundColor: Colors.primary + '25', paddingHorizontal: 5, paddingVertical: 1, borderRadius: 3 },
+  landscapeCardBadgeText: { color: Colors.primaryLight, fontSize: 9 },
 });

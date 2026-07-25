@@ -30,32 +30,27 @@ export function BottomNav({ activeTab, onTabPress }: BottomNavProps) {
 
   if (landscape) {
     return (
-      <View style={styles.sidebar}>
-        <View style={styles.sidebarInner}>
-          {/* Logo */}
-          <View style={styles.sidebarLogo}>
-            <Text style={styles.sidebarLogoText}>L</Text>
-          </View>
-
-          {/* Nav Items */}
+      <View style={styles.landscapeBottomBar}>
+        <View style={styles.landscapeBottomInner}>
           {tabs.map((tab) => {
             const isActive = activeTab === tab.id;
             return (
               <TouchableOpacity
                 key={tab.id}
-                style={[styles.sidebarTab, isActive && styles.sidebarTabActive]}
+                style={[styles.landscapeTab, isActive && styles.landscapeTabActive]}
                 onPress={() => onTabPress(tab.id)}
                 activeOpacity={0.7}
                 focusable={true}
               >
                 <Ionicons
                   name={isActive ? tab.icon : tab.iconOutline}
-                  size={22}
+                  size={20}
                   color={isActive ? Colors.primary : Colors.textMuted}
                 />
-                <Text style={[styles.sidebarLabel, isActive && styles.sidebarLabelActive]}>
+                <Text style={[styles.landscapeLabel, isActive && styles.landscapeLabelActive]}>
                   {tab.label}
                 </Text>
+                {isActive && <View style={styles.landscapeActiveDot} />}
               </TouchableOpacity>
             );
           })}
@@ -144,56 +139,59 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.primary,
   },
 
-  // Landscape - Sidebar
-  sidebar: {
+  // Landscape - Compact Bottom Bar
+  landscapeBottomBar: {
     position: 'absolute',
-    top: 0,
-    left: 0,
     bottom: 0,
-    width: SIDEBAR_WIDTH,
-    backgroundColor: Colors.backgroundLight,
-    borderRightWidth: 1,
-    borderRightColor: Colors.border,
-    zIndex: 100,
+    left: 72,
+    right: 0,
+    paddingBottom: Spacing.xs,
+    paddingHorizontal: Spacing.md,
   },
-  sidebarInner: {
+  landscapeBottomInner: {
+    flexDirection: 'row',
+    backgroundColor: Colors.backgroundLight,
+    borderRadius: BorderRadius.lg,
+    paddingVertical: Spacing.xs,
+    paddingHorizontal: Spacing.sm,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  landscapeTab: {
     flex: 1,
     alignItems: 'center',
-    justifyContent: 'space-around',
-    paddingTop: Spacing.xxl + Spacing.md,
-    paddingBottom: Spacing.xxl,
+    paddingVertical: 4,
+    position: 'relative',
   },
-  sidebarLogo: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: Colors.primary,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: Spacing.md,
+  landscapeTabActive: {
+    backgroundColor: Colors.primary + '15',
+    borderRadius: BorderRadius.sm,
   },
-  sidebarLogoText: {
-    color: Colors.text,
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-  sidebarTab: {
-    alignItems: 'center',
-    paddingVertical: Spacing.sm,
-    paddingHorizontal: Spacing.sm,
-    borderRadius: BorderRadius.md,
-    width: 56,
-  },
-  sidebarTabActive: {
-    backgroundColor: Colors.primary + '20',
-  },
-  sidebarLabel: {
+  landscapeLabel: {
     fontSize: 10,
     color: Colors.textMuted,
-    marginTop: 4,
+    marginTop: 2,
   },
-  sidebarLabelActive: {
+  landscapeLabelActive: {
     color: Colors.primary,
     fontWeight: '600',
   },
+  landscapeActiveDot: {
+    position: 'absolute',
+    bottom: 2,
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: Colors.primary,
+  },
+
+  // Legacy sidebar (kept for reference)
+  sidebar: { display: 'none' },
+  sidebarInner: { display: 'none' },
+  sidebarLogo: { display: 'none' },
+  sidebarLogoText: { display: 'none' },
+  sidebarTab: { display: 'none' },
+  sidebarTabActive: { display: 'none' },
+  sidebarLabel: { display: 'none' },
+  sidebarLabelActive: { display: 'none' },
 });
