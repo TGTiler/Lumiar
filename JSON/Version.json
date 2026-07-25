@@ -1,5 +1,5 @@
 {
-  "Versao": "1.2.6",
-  "Download": "https://github.com/TGTiler/Lumiar/releases/download/v1.2.6/Lumiar-v1.2.6.apk",
-  "Changelog": "Fix landscape layout, gamepad recommendation, fix share URL (lumiarstore://), fix update check"
+  "Versao": "1.2.7",
+  "Download": "https://github.com/TGTiler/Lumiar/releases/download/v1.2.7/Lumiar-v1.2.7.apk",
+  "Changelog": "Fix screenshots: cover no carrossel, contain no modal tela cheia"
 }

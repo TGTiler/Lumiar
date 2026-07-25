@@ -175,12 +175,12 @@ export function AppDetailScreen({ route, navigation }: AppDetailScreenProps) {
               <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.screenshotsList}>
                 {isValidUrl(app.img1) && (
                   <TouchableOpacity onPress={() => setLightboxUri(app.img1)}>
-                    <Image source={{ uri: app.img1 }} style={[styles.screenshot, isLandscape && styles.screenshotLandscape]} resizeMode="contain" />
+                    <Image source={{ uri: app.img1 }} style={[styles.screenshot, isLandscape && styles.screenshotLandscape]} resizeMode="cover" />
                   </TouchableOpacity>
                 )}
                 {isValidUrl(app.img2) && (
                   <TouchableOpacity onPress={() => setLightboxUri(app.img2)}>
-                    <Image source={{ uri: app.img2 }} style={[styles.screenshot, isLandscape && styles.screenshotLandscape]} resizeMode="contain" />
+                    <Image source={{ uri: app.img2 }} style={[styles.screenshot, isLandscape && styles.screenshotLandscape]} resizeMode="cover" />
                   </TouchableOpacity>
                 )}
               </ScrollView>
