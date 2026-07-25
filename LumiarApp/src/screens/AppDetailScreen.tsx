@@ -175,12 +175,12 @@ export function AppDetailScreen({ route, navigation }: AppDetailScreenProps) {
               <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.screenshotsList}>
                 {isValidUrl(app.img1) && (
                   <TouchableOpacity onPress={() => setLightboxUri(app.img1)}>
-                    <Image source={{ uri: app.img1 }} style={[styles.screenshot, isLandscape && styles.screenshotLandscape]} resizeMode="cover" />
+                    <Image source={{ uri: app.img1 }} style={[styles.screenshot, isLandscape && styles.screenshotLandscape]} resizeMode="contain" />
                   </TouchableOpacity>
                 )}
                 {isValidUrl(app.img2) && (
                   <TouchableOpacity onPress={() => setLightboxUri(app.img2)}>
-                    <Image source={{ uri: app.img2 }} style={[styles.screenshot, isLandscape && styles.screenshotLandscape]} resizeMode="cover" />
+                    <Image source={{ uri: app.img2 }} style={[styles.screenshot, isLandscape && styles.screenshotLandscape]} resizeMode="contain" />
                   </TouchableOpacity>
                 )}
               </ScrollView>
@@ -240,9 +240,9 @@ const styles = StyleSheet.create({
   backHomeText: { color: Colors.text, fontSize: 16, fontWeight: '600' },
   scroll: { flex: 1 },
   scrollContent: { paddingBottom: 100 },
-  bannerContainer: { width, height: 220, position: 'relative' },
-  bannerContainerLandscape: { height: 160 },
-  bannerImage: { width: '100%', height: '100%' },
+  bannerContainer: { width: '100%', height: 220, position: 'relative', backgroundColor: '#000' },
+  bannerContainerLandscape: { height: 180 },
+  bannerImage: { width: '100%', height: '100%', resizeMode: 'cover' },
   fallbackBanner: { width: '100%', height: '100%', backgroundColor: Colors.primary, justifyContent: 'center', alignItems: 'center' },
   fallbackBannerText: { color: Colors.text, fontSize: 64, fontWeight: 'bold', opacity: 0.3 },
   bannerOverlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.3)' },
@@ -267,8 +267,8 @@ const styles = StyleSheet.create({
   descText: { color: Colors.textSecondary, fontSize: 14, lineHeight: 22 },
   screenshotsSection: { marginBottom: Spacing.lg },
   screenshotsList: { paddingBottom: Spacing.xs },
-  screenshot: { width: SCREENSHOT_WIDTH, height: 200, borderRadius: BorderRadius.md, backgroundColor: Colors.surface, marginRight: Spacing.sm },
-  screenshotLandscape: { width: SCREENSHOT_WIDTH * 0.8, height: 140 },
+  screenshot: { width: SCREENSHOT_WIDTH, height: 200, borderRadius: BorderRadius.md, backgroundColor: Colors.surface, marginRight: Spacing.sm, overflow: 'hidden' },
+  screenshotLandscape: { width: SCREENSHOT_WIDTH * 0.8, height: 160 },
   infoCards: { flexDirection: 'row', gap: Spacing.sm },
   infoCard: { flex: 1, backgroundColor: Colors.backgroundCard, borderRadius: BorderRadius.md, padding: Spacing.md, alignItems: 'center', borderWidth: 1, borderColor: Colors.border },
   infoLabel: { color: Colors.textMuted, fontSize: 11, marginTop: Spacing.xs },
