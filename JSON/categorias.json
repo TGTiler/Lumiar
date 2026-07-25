@@ -89,6 +89,12 @@
       "slug": "saude",
       "icon": "❤️",
       "color": "#ff0000"
+    },
+    {
+      "nome": "Educação & Leitura",
+      "slug": "educacao",
+      "icon": "📚",
+      "color": "#FF9F43"
     }
   ],
   "subcategories": [
@@ -113,6 +119,11 @@
       "parent": "Jogos"
     },
     {
+      "nome": "RPG & Aventuras de Turno",
+      "slug": "rpg",
+      "parent": "Jogos"
+    },
+    {
       "nome": "Tiro & FPS",
       "slug": "tiro-fps",
       "parent": "Jogos"
@@ -130,6 +141,26 @@
     {
       "nome": "Terror & Sobrevivência",
       "slug": "terror-survival",
+      "parent": "Jogos"
+    },
+    {
+      "nome": "Estratégia & Simulação",
+      "slug": "estrategia-simulacao",
+      "parent": "Jogos"
+    },
+    {
+      "nome": "Corrida & Veículos",
+      "slug": "corrida-veiculos",
+      "parent": "Jogos"
+    },
+    {
+      "nome": "Luta & Batalha",
+      "slug": "luta-batalha",
+      "parent": "Jogos"
+    },
+    {
+      "nome": "Lógica, Board & Cartas",
+      "slug": "board-cartas",
       "parent": "Jogos"
     },
     {
@@ -403,11 +434,6 @@
       "parent": "Otimização & Performance"
     },
     {
-      "nome": "Blockchain & Criptomoedas",
-      "slug": "blockchain-criptomoedas",
-      "parent": "Utilidades"
-    },
-    {
       "nome": "Gestão Pessoal & Controle Financeiro",
       "slug": "controle-pessoal",
       "parent": "Finanças & Gestão"
@@ -456,6 +482,21 @@
       "nome": "Utilidades Médicas & Exames",
       "slug": "utilidades-medicas",
       "parent": "Saúde & Bem-Estar"
+    },
+    {
+      "nome": "Cursos & Idiomas",
+      "slug": "cursos-idiomas",
+      "parent": "Educação & Leitura"
+    },
+    {
+      "nome": "Leitores, Ebooks & HQs",
+      "slug": "leitores-ebooks",
+      "parent": "Educação & Leitura"
+    },
+    {
+      "nome": "Dicionários & Tradutores",
+      "slug": "dicionarios-tradutores",
+      "parent": "Educação & Leitura"
     }
   ]
 }
