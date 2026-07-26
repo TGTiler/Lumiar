@@ -1,5 +1,5 @@
 {
-  "Versao": "1.2.7",
-  "Download": "https://github.com/TGTiler/Lumiar/releases/download/v1.2.7/Lumiar-v1.2.7.apk",
-  "Changelog": "Fix screenshots: cover no carrossel, contain no modal tela cheia"
+  "Versao": "1.2.8",
+  "Download": "https://github.com/TGTiler/Lumiar/releases/download/v1.2.8/Lumiar-v1.2.8.apk",
+  "Changelog": "Busca inteligente com ranking por relevancia, normalizacao de acentos, suporte a tags"
 }

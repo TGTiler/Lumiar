@@ -5,6 +5,7 @@ export interface AppData {
   NomeAPP: string;
   Versao: string;
   Descricao: string;
+  descricao?: string;
   logo: string;
   img1: string;
   img2: string;
@@ -14,6 +15,7 @@ export interface AppData {
   CategoriaSlug: string;
   SubcategoriaSlug: string;
   Destaque?: boolean;
+  tags?: string[];
 }
 
 export interface CategoryData {
@@ -33,6 +35,58 @@ export interface VersionData {
   Versao: string;
   Download: string;
   Changelog: string;
+}
+
+function normalizarTexto(texto: string): string {
+  if (!texto) return '';
+  return texto
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
+}
+
+function buscarAppsInteligente(query: string, listaApps: AppData[]): AppData[] {
+  const q = normalizarTexto(query.trim());
+  if (!q) return listaApps;
+
+  const termosBusca = q.split(' ').filter(t => t.length > 0);
+
+  const resultadosPonderados = listaApps.map(app => {
+    let score = 0;
+    const nomeApp = normalizarTexto(app.NomeAPP);
+    const descApp = normalizarTexto(app.Descricao || app.descricao || '');
+    const catApp = normalizarTexto(app.categoria || '');
+    const catSlugApp = normalizarTexto(app.CategoriaSlug || '');
+    const subCatApp = normalizarTexto(app.SubcategoriaSlug || '');
+    const tagsApp = (app.tags || []).map(t => normalizarTexto(t));
+
+    termosBusca.forEach(termo => {
+      if (!termo) return;
+
+      // 1. Match exato no nome
+      if (nomeApp === termo) score += 100;
+      // 2. Nome comeca com o termo
+      else if (nomeApp.startsWith(termo)) score += 75;
+      // 3. Nome contem o termo
+      else if (nomeApp.includes(termo)) score += 50;
+
+      // 4. Match nas Tags
+      if (tagsApp.some(tag => tag.includes(termo))) score += 40;
+
+      // 5. Match na Categoria ou Subcategoria
+      if (catApp.includes(termo) || catSlugApp.includes(termo) || subCatApp.includes(termo)) score += 30;
+
+      // 6. Match na Descricao
+      if (descApp.includes(termo)) score += 10;
+    });
+
+    return { app, score };
+  });
+
+  return resultadosPonderados
+    .filter(item => item.score > 0)
+    .sort((a, b) => b.score - a.score)
+    .map(item => item.app);
 }
 
 class ApiService {
@@ -105,31 +159,7 @@ class ApiService {
 
   async searchApps(query: string): Promise<AppData[]> {
     const apps = await this.fetchApps();
-    const lowerQuery = query.toLowerCase();
-
-    const matches = apps.filter(app =>
-      app.NomeAPP.toLowerCase().includes(lowerQuery) ||
-      (app.Descricao || app.descricao || '').toLowerCase().includes(lowerQuery) ||
-      app.categoria.toLowerCase().includes(lowerQuery)
-    );
-
-    // Sort by relevance: NomeAPP match first, then Descricao/categoria
-    return matches.sort((a, b) => {
-      const aName = a.NomeAPP.toLowerCase();
-      const bName = b.NomeAPP.toLowerCase();
-      const aNameMatch = aName.includes(lowerQuery);
-      const bNameMatch = bName.includes(lowerQuery);
-      if (aNameMatch && !bNameMatch) return -1;
-      if (!aNameMatch && bNameMatch) return 1;
-      // Both match name - prefer startsWith
-      if (aNameMatch && bNameMatch) {
-        const aStarts = aName.startsWith(lowerQuery);
-        const bStarts = bName.startsWith(lowerQuery);
-        if (aStarts && !bStarts) return -1;
-        if (!aStarts && bStarts) return 1;
-      }
-      return 0;
-    });
+    return buscarAppsInteligente(query, apps);
   }
 
   async getAppsByCategory(category: string): Promise<AppData[]> {
