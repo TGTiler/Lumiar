@@ -535,7 +535,7 @@
     "img1": "https://tekmods.com/wp-content/uploads/2026/04/Kumo-Animes-Apk-461x1024.jpg",
     "img2": "https://tekmods.com/wp-content/uploads/2026/04/Kumo-Animes-Apk-Mod-Download-461x1024.jpg",
     "url_apk": "https://github.com/TGTiler/Lumiar/releases/download/apks2/45.apk",
-    "descricao": "Kumo Animes Mod Apk é um aplicativo Android focado exclusivamente em animes, mangás e conteúdos relacionados. Ele funciona como uma central de streaming gratuita, onde você navega, escolhe episódios e assiste sem precisar de assinatura. Diferente de sites cheios de pop-ups, o app entrega uma experiência limpa e organizada.",
+    "descricao": "Kumo Animes é um aplicativo Android focado exclusivamente em animes, mangás e conteúdos relacionados. Ele funciona como uma central de streaming gratuita, onde você navega, escolhe episódios e assiste sem precisar de assinatura. Diferente de sites cheios de pop-ups, o app entrega uma experiência limpa e organizada.",
     "categoria": "Mídia",
     "subcategoria": "Streaming & TV"
   },
@@ -1486,5 +1486,65 @@
     "descricao": "🤖 AI CHAT - SEU ASSISTENTE INTELIGENTE PARA AUMENTAR A PRODUTIVIDADE\nExperimente o poder dos modelos avançados de IA com o AI Chat, sua solução completa para conversas inteligentes. Desenvolvido com inteligência artificial de ponta, ele integra modelos avançados de IA para oferecer desempenho e eficiência superiores. O AI Chat traz uma ferramenta inovadora que aprimora sua escrita, integrada a um assistente de escrita com IA, melhorando seu tempo de resposta.",
     "categoria": "Inteligência Artificial",
     "subcategoria": "Assistentes & Chatbots"
+  },
+  {
+    "ID": "Yfoj!y3Cp7%SEjHT",
+    "NomeAPP": "Baixador de Vídeos",
+    "Versao": "2.5.6",
+    "logo": "https://play-lh.googleusercontent.com/oju7a2AuqaQSc_l5O-2yRw8F_M0rUlHnBHjp_MqHNSAT3CXq7xbSqRVL7VSPNhMRjzaM2ft-LBoA05-q9hqmhg=w240-h480-rw",
+    "img1": "https://play-lh.googleusercontent.com/QKYDX8bkB2DjcAAMU5xfegVjZ2YDDFE1pnR4Is8k_R-0gnF3XNGHnMfqw2o3WCr6vs8FQlpt0NPmbpM6C5IF7A=w2560-h1440-rw",
+    "img2": "https://play-lh.googleusercontent.com/lnTWmgHA4B4NIebk0E6RAxYASJwY60_hac2PC16tE0g2sMVOb2Luoh3zlQdWJR062nJWNvtOcccU0SnwjPAVbw=w2560-h1440-rw",
+    "url_apk": "https://github.com/TGTiler/Lumiar/releases/download/apks2/125.apk",
+    "descricao": "Baixe facilmente vídeos e músicas diretamente da Internet para o seu dispositivo. Todos os formatos são suportados. 100% grátis!\n\nO Video downloader detecta os vídeos automaticamente, você pode baixá-los com apenas um clique. O potente gerenciador de download permite pausar e continuar downloads, baixar em segundo plano e baixar vários arquivos ao mesmo tempo. Visualize o vídeo primeiro, baixe rapidamente e reproduza offline.",
+    "categoria": "Utilidades",
+    "subcategoria": "Instaladores & Extração"
+  },
+  {
+    "ID": "BYBp!ZftF3!ATTN2",
+    "NomeAPP": "UniTv player",
+    "Versao": "1.8.0",
+    "logo": "https://play-lh.googleusercontent.com/6a0r0Uy3aOOTtpryKb-73NZAMlbTpZwcoOskZxoS5tqZ6mksS1Lrr7hSHcVOa3xsJ74oCF5RwudF9ybDI9Ok=w240-h480-rw",
+    "img1": "https://play-lh.googleusercontent.com/W4z-2Tuf1j3moOfRQts3sfZjTFnGiRPp1nSsSVHifqaMAzNOYLsIkfVuwDtBGAdBhFuJFgAbfLIvCP2vrTK-KpI=w2560-h1440-rw",
+    "img2": "https://play-lh.googleusercontent.com/DcekxFyUxJ4wu9P42H3ZHi5pKu6wbI55xvlw5XTcpnoETgYBEzVxvnMQDFKWq_kXw_PtPOXslQ7UQ30DFUu1=w2560-h1440-rw",
+    "url_apk": "https://github.com/TGTiler/Lumiar/releases/download/apks2/126.apk",
+    "descricao": "O UniTv player é uma plataforma dedicada a ajudar entusiastas de streaming! O UniTv player indexa automaticamente conteúdos encontrados na web utilizando robôs e inteligência artificial, com o suporte de APIs públicas do TMDB, IMDB e outros. O uso do UniTv player é de inteira responsabilidade do usuário. Os filmes são distribuídos por meio de plataformas como mystream, fembed e outras. Caso identifique qualquer violação de direitos autorais, entre em contato com o distribuidor. Se tiver dúvidas ou reclamações sobre conteúdo, funcionalidade do site, publicidade ou outros assuntos, entre em contato com a equipe de suporte do UniTv player pelo e-mail unitv@mail.com.",
+    "categoria": "Mídia",
+    "subcategoria": "Streaming & TV"
+  },
+  {
+    "ID": "agH7*JwuuE!exdtk",
+    "NomeAPP": "Words of Wonders",
+    "Versao": "5.8.2",
+    "logo": "https://play-lh.googleusercontent.com/AbIaYcBgzemtIlN18HxXA1pE8SEY9d2yK133iqNYw1IwKaXSoUXLt3Z-yPbfOjIN2njt5mQ6qUHSyvKZOyQaHys=s48-rw",
+    "img1": "https://play-lh.googleusercontent.com/pspXFxz8UNmp2ZPfQ8dQg8Yv8dlIujveXiCmnAG6q9a-4MFhrtLtNudD_zPu7ox4zsVBoLADfPaK6bM_Xy3w=w2560-h1440-rw",
+    "img2": "https://play-lh.googleusercontent.com/huUKomX5rhKxtuAkA5OptuSMySc1zr-dVrUD2ySabJXiEzGhSDKrI_eREc0l2n5dRC43a_uPUpo9cH_8uWd2bg=w2560-h1440-rw",
+    "url_apk": "https://github.com/TGTiler/Lumiar/releases/download/apks2/127.apk",
+    "descricao": "Bem-vindo a Words of Wonders! Neste fantástico jogo de palavras cruzadas ao redor do mundo, você irá melhorar as suas habilidades de vocabulário, soletração e ort",
+    "categoria": "Jogos",
+    "subcategoria": "Casual & Puzzle"
+  },
+  {
+    "ID": "sLxz#Av1HH%2tW4C",
+    "NomeAPP": "AIRLINE COMMANDER: Jogo de voo",
+    "Versao": "2.7.9",
+    "logo": "https://play-lh.googleusercontent.com/oOu-ZVTGLNrFzTlCXeY7ELGdOxN9Fmpu2YWBZA0DMRZaVMenL_NbCXtn6YtFKcUxtYVH5nUFhYZBINfkRGHk7Q=s48-rw",
+    "img1": "https://play-lh.googleusercontent.com/RZ3Pnlw4nhiHhrJqnySKz6jH5wF6tI55QRxclLQ8WSDJha50pE9IlglLZlIhgQOvx8VJdhH-2HCShrq7GLNd=w2560-h1440-rw",
+    "img2": "https://play-lh.googleusercontent.com/2MiHjYcjcnRI2vsDsQjdBPl3GDXocvTkyRsLZ5FkVbRDzSDxqHBC4MVuruTK6t87VGgSUDRyTGM8pKOY3o7Niz8=w2560-h1440-rw",
+    "url_apk": "https://github.com/TGTiler/Lumiar/releases/download/apks2/128.apk",
+    "descricao": "Conheça o mais avançado simulador de voo. Decole, voe para o aeroporto da cidade vizinha e pouse. Monte e administre uma frota de aeronaves. E este é apenas o começo do que o Airline Commander, um jogo realista de avião, tem a oferecer!",
+    "categoria": "Jogos",
+    "subcategoria": "Estratégia & Simulação"
+  },
+  {
+    "ID": "Z09H*Jhcwh#WENNs",
+    "NomeAPP": "Football League 2026",
+    "Versao": "0.2.6",
+    "logo": "https://play-lh.googleusercontent.com/JauranxwFAASQTa-pc7tIs73zNt7lzUjjlCCWujcNELSCzSUzzKM__zaM8FZjWET3ULNEiqeR1vg_lxAAPPK=s48-rw",
+    "img1": "https://play-lh.googleusercontent.com/OKDdxL5raox2TGmH2RZvW5TgENhU6ZRMEvI0o-1UNtISH7pLqeyVWate0TwQj01RSbXA8VNIZEqNd44AcXjWoA=w2560-h1440-rw",
+    "img2": "https://play-lh.googleusercontent.com/k8o1qLa0gyc8P35phMt86ZHpZfQd4a14QfM6YxFP1luNLsU5NyWiPsqPAUUR0KRM_BosagZ9Y6VWROwhMf3qbU0=w2560-h1440-rw",
+    "url_apk": "https://github.com/TGTiler/Lumiar/releases/download/apks2/129.apk",
+    "descricao": "VIVA WORLD FOOTBALL! Football League 2026 chega melhor do que nunca!\nEntre em campo com Manchester City e AS Monaco, totalmente licenciados no FL26. Desfrute de ação completa de jogadores em 3D, interface elegante e estádios incríveis. Jogue online ou offline, participe de eventos e desafios emocionantes, e escolha comentários multilíngues para uma experiência personalizada. Escolha seu elenco e monte seu time com mais de 40.000 jogadores do mundo todo. Esta é a sua experiência de futebol mobile de próxima geração!",
+    "categoria": "Jogos",
+    "subcategoria": "Futebol & Esportes"
   }
 ]
