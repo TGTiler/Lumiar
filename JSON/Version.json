@@ -1,5 +1,5 @@
 {
-  "Versao": "1.2.8",
-  "Download": "https://github.com/TGTiler/Lumiar/releases/download/v1.2.8/Lumiar-v1.2.8.apk",
-  "Changelog": "Busca inteligente com ranking por relevancia, normalizacao de acentos, suporte a tags"
+  "Versao": "1.2.9",
+  "Download": "https://github.com/TGTiler/Lumiar/releases/download/v1.2.9/Lumiar-v1.2.9.apk",
+  "Changelog": "Fix rodape cobrindo botoes virtuais Android (SafeAreaInsets), androidNavigationBar configurado"
 }
