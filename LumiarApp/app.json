@@ -3,7 +3,7 @@
     "name": "Lumiar Store",
     "slug": "lumiar-store",
     "owner": "tilerfps",
-    "version": "1.2.8",
+    "version": "1.2.9",
     "scheme": "lumiarstore",
     "orientation": "default",
     "icon": "./assets/icon.png",
@@ -18,7 +18,7 @@
         "backgroundColor": "#8A2BE2"
       },
       "package": "com.tgtiler.lumiar",
-      "versionCode": 19,
+      "versionCode": 20,
       "reactNativeArchitectures": ["armeabi-v7a", "arm64-v8a"],
       "permissions": [
         "INTERNET",
@@ -30,7 +30,15 @@
     "web": {
       "favicon": "./assets/icon.png"
     },
-    "plugins": [],
+    "plugins": [
+      [
+        "expo-navigation-bar",
+        {
+          "backgroundColor": "#0F0F1A",
+          "style": "light-content"
+        }
+      ]
+    ],
     "extra": {
       "eas": {
         "projectId": "ce2a905c-6f58-4263-b4f8-2cf9fa451744"

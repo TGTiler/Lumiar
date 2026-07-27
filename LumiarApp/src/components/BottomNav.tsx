@@ -7,6 +7,7 @@ import {
   Platform,
   Dimensions,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Spacing, BorderRadius } from '../constants/theme';
 
@@ -27,10 +28,12 @@ function isLandscape(): boolean {
 
 export function BottomNav({ activeTab, onTabPress }: BottomNavProps) {
   const landscape = isLandscape();
+  const insets = useSafeAreaInsets();
+  const bottomPadding = insets.bottom > 0 ? insets.bottom + 8 : 16;
 
   if (landscape) {
     return (
-      <View style={styles.landscapeBottomBar}>
+      <View style={[styles.landscapeBottomBar, { paddingBottom: bottomPadding }]}>
         <View style={styles.landscapeBottomInner}>
           {tabs.map((tab) => {
             const isActive = activeTab === tab.id;
@@ -60,7 +63,7 @@ export function BottomNav({ activeTab, onTabPress }: BottomNavProps) {
   }
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { paddingBottom: bottomPadding }]}>
       <View style={styles.inner}>
         {tabs.map((tab) => {
           const isActive = activeTab === tab.id;
@@ -98,7 +101,6 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    paddingBottom: Platform.OS === 'ios' ? 20 : 8,
     paddingHorizontal: Spacing.lg,
   },
   inner: {
@@ -145,7 +147,6 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 72,
     right: 0,
-    paddingBottom: Spacing.xs,
     paddingHorizontal: Spacing.md,
   },
   landscapeBottomInner: {

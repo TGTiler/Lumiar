@@ -1,6 +1,6 @@
 {
   "name": "lumiarapp",
-  "version": "1.2.8",
+  "version": "1.2.9",
   "main": "index.ts",
   "dependencies": {
     "@expo/vector-icons": "^15.1.1",
@@ -12,11 +12,13 @@
     "expo-image-picker": "^57.0.5",
     "expo-intent-launcher": "^57.0.1",
     "expo-linking": "^57.0.3",
+    "expo-navigation-bar": "~57.0.2",
     "expo-splash-screen": "^57.0.4",
     "expo-status-bar": "~57.0.1",
     "react": "19.2.3",
     "react-native": "0.86.0",
     "react-native-gesture-handler": "^3.1.0",
+    "react-native-safe-area-context": "^5.8.0",
     "react-native-svg": "^15.15.5"
   },
   "devDependencies": {
