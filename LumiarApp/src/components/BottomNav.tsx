@@ -29,7 +29,9 @@ function isLandscape(): boolean {
 export function BottomNav({ activeTab, onTabPress }: BottomNavProps) {
   const landscape = isLandscape();
   const insets = useSafeAreaInsets();
-  const bottomPadding = insets.bottom > 0 ? insets.bottom + 8 : 16;
+
+  const bottomSpace = insets?.bottom ?? 0;
+  const bottomPadding = Math.max(bottomSpace, 12);
 
   if (landscape) {
     return (

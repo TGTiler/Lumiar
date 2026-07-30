@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { View, BackHandler, ToastAndroid, Platform } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import * as Linking from 'expo-linking';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Colors } from './src/constants/theme';
 import { HomeScreen } from './src/screens/HomeScreen';
 import { AppDetailScreen } from './src/screens/AppDetailScreen';
@@ -112,39 +113,41 @@ export default function App() {
   }, [showDetail, showProfile, showUpdate, showSettings]);
 
   return (
-    <View style={{ flex: 1, backgroundColor: Colors.background }}>
-      <StatusBar style="light" backgroundColor={Colors.background} />
+    <SafeAreaProvider>
+      <View style={{ flex: 1, backgroundColor: Colors.background }}>
+        <StatusBar style="light" />
 
-      {/* Home - ALWAYS mounted, never remounted */}
-      {!showSettings && (
-        <HomeScreen
-          navigation={navigation}
-          style={{ display: showDetail ? 'none' : 'flex' }}
-        />
-      )}
+        {/* Home - ALWAYS mounted, never remounted */}
+        {!showSettings && (
+          <HomeScreen
+            navigation={navigation}
+            style={{ display: showDetail ? 'none' : 'flex' }}
+          />
+        )}
 
-      {/* Settings - mounted when tab active */}
-      {showSettings && <SettingsScreen navigation={navigation} />}
+        {/* Settings - mounted when tab active */}
+        {showSettings && <SettingsScreen navigation={navigation} />}
 
-      {/* Detail - mounted on top when needed */}
-      {showDetail && detailAppId && (
-        <AppDetailScreen
-          navigation={navigation}
-          route={{ params: { appId: detailAppId } }}
-        />
-      )}
+        {/* Detail - mounted on top when needed */}
+        {showDetail && detailAppId && (
+          <AppDetailScreen
+            navigation={navigation}
+            route={{ params: { appId: detailAppId } }}
+          />
+        )}
 
-      {/* Bottom Nav */}
-      {!showDetail && (
-        <BottomNav
-          activeTab={activeTab}
-          onTabPress={(tab) => navigation.tabNavigate(tab)}
-        />
-      )}
+        {/* Bottom Nav */}
+        {!showDetail && (
+          <BottomNav
+            activeTab={activeTab}
+            onTabPress={(tab) => navigation.tabNavigate(tab)}
+          />
+        )}
 
-      {/* Modals */}
-      <ProfileModal visible={showProfile} onClose={() => setShowProfile(false)} onSave={() => {}} />
-      <UpdateModal visible={showUpdate} updateInfo={updateInfo} onDismiss={() => setShowUpdate(false)} />
-    </View>
+        {/* Modals */}
+        <ProfileModal visible={showProfile} onClose={() => setShowProfile(false)} onSave={() => {}} />
+        <UpdateModal visible={showUpdate} updateInfo={updateInfo} onDismiss={() => setShowUpdate(false)} />
+      </View>
+    </SafeAreaProvider>
   );
 }

@@ -1,5 +1,5 @@
 {
-  "Versao": "1.2.8",
-  "Download": "https://github.com/TGTiler/Lumiar/releases/download/v1.2.8/Lumiar-v1.2.8.apk",
-  "Changelog": "Fix rodape cobrindo botoes virtuais Android (SafeAreaInsets), androidNavigationBar configurado"
+  "Versao": "1.3.0",
+  "Download": "https://github.com/TGTiler/Lumiar/releases/download/v1.3.0/Lumiar-v1.3.0.apk",
+  "Changelog": "Fixes UI bugs: SafeAreaProvider, AbsoluteFill, file-system/legacy, BottomNav padding, novos apps"
 }

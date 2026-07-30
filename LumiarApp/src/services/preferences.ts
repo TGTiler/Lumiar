@@ -14,8 +14,9 @@ export async function loadPreferences(): Promise<UserPreferences> {
   try {
     const data = await AsyncStorage.getItem(PREFS_KEY);
     if (data) {
-      cachedPrefs = JSON.parse(data);
-      return cachedPrefs;
+      const parsed = JSON.parse(data) as UserPreferences;
+      cachedPrefs = parsed;
+      return parsed;
     }
   } catch {}
   cachedPrefs = { subcategoryWeights: {}, lastInteraction: Date.now() };

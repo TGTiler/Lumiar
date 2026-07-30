@@ -649,7 +649,7 @@ const styles = StyleSheet.create({
   loadingContainer: { flex: 1, backgroundColor: Colors.background, justifyContent: 'center', alignItems: 'center' },
   loadingText: { color: Colors.textSecondary, marginTop: Spacing.md, fontSize: 16 },
   scrollView: { flex: 1 },
-  scrollContent: { paddingBottom: 120 },
+  scrollContent: { paddingBottom: 100 },
   header: {
     paddingHorizontal: Spacing.md, paddingTop: Spacing.xl, paddingBottom: Spacing.sm,
     backgroundColor: Colors.background + 'F0', zIndex: 100, elevation: 100,
@@ -728,7 +728,7 @@ const styles = StyleSheet.create({
 
   // Landscape
   landscapeContainer: { flex: 1, backgroundColor: Colors.background },
-  landscapeContent: { flex: 1, padding: Spacing.md, paddingBottom: 60 },
+  landscapeContent: { flex: 1, padding: Spacing.md, paddingBottom: 100 },
   landscapeHeader: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
     marginBottom: Spacing.sm, paddingTop: Spacing.xs,
@@ -751,7 +751,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm,
   },
   landscapeGridContent: {
-    paddingBottom: 80,
+    paddingBottom: 100,
   },
   landscapeHorizontalCard: {
     width: '48%',
